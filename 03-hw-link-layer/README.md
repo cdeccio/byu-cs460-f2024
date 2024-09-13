@@ -115,10 +115,11 @@ s1$ sudo ovs-appctl fdb/flush s2
     s1$ sudo ovs-appctl fdb/show s2
     ```
 
-    What entries are in the tables?
+    Which entries make up `s1`'s switch table?
 
+ 2. Which entries make up `s2`'s switch table?
 
- 2. Run the following command on `b` to send a single frame from `b` to `e`:
+ 3. Run the following command on `b` to send a single frame from `b` to `e`:
    
     ```bash
     b$ ping -c 1 -W 1 10.0.0.5
@@ -132,16 +133,19 @@ s1$ sudo ovs-appctl fdb/flush s2
     column.  The rows in the captures all represent the same frame as seen by
     different interfaces.
 
-    Which links saw the frame from `b` to `e`?  Hint: look at the information in
-    the "Frame" layer in Wireshark.
+    Which links saw the frame from `b` to `e`?  Hint: the name of the interface
+    on which a frame was seen can be found in the "Frame" layer in Wireshark.
+    Each interface name corresponds to the names of the two devices to which it
+    is connected, e.g., interface `a-s1` represents the interface on host `a`
+    that connects it to switch `s1`.
 
 
- 3. On which link(s) (i.e., between which two network components) do/does the
+ 4. On which link(s) (i.e., between which two network components) do/does the
     frame(s) include an 802.1Q frame header?  What is the value of the ID field
     in the 802.1Q header of that frame?
 
     
- 4. Run the following command on `s1` to show the state of the MAC address
+ 5. Run the following command on `s1` to show the state of the MAC address
     tables:
 
     ```bash
@@ -149,10 +153,12 @@ s1$ sudo ovs-appctl fdb/flush s2
     s1$ sudo ovs-appctl fdb/show s2
     ```
 
-    What entries are now in the tables?
+    Which entries now make up `s1`'s switch table?
+
+ 6. Which entries make up `s2`'s switch table?
 
 
- 5. Run the following command on `e` to send a single frame from `e` to `b`:
+ 7. Run the following command on `e` to send a single frame from `e` to `b`:
    
     ```bash
     e$ ping -c 1 -W 1 10.0.0.2
@@ -163,7 +169,7 @@ s1$ sudo ovs-appctl fdb/flush s2
     Which links saw the frame from `e` to `b`?
 
 
- 6. Run the following command on `s1` to show the state of the MAC address
+ 8. Run the following command on `s1` to show the state of the MAC address
     tables:
 
     ```bash
@@ -174,7 +180,7 @@ s1$ sudo ovs-appctl fdb/flush s2
     What entries are now in the tables?
 
 
- 7. Go back to the terminal from which you started the network.  It should say:
+ 9. Go back to the terminal from which you started the network.  It should say:
     `Ctrl-c to quit`.  Now enter `Ctrl`-`c`.  Then re-start the network with
     the following:
    
@@ -200,24 +206,24 @@ s1$ sudo ovs-appctl fdb/flush s2
     difference?
 
 
- 8. Now stop (`Ctrl`-`c`) the network and re-start a variant of the previous
-    configuration with:
+ 10. Now stop (`Ctrl`-`c`) the network and re-start a variant of the previous
+     configuration with:
     
-    ```bash
-    $ cougarnet --display --disable-ipv6 h6-s2.cfg
-    ```
+     ```bash
+     $ cougarnet --display --disable-ipv6 h6-s2.cfg
+     ```
 
-    Now run the following from host `b`:
+     Now run the following from host `b`:
 
-    ```bash
-    b$ ping -c 5 -W 1 10.0.0.5
-    ```
+     ```bash
+     b$ ping -c 5 -W 1 10.0.0.5
+     ```
 
-    Then:
+     Then:
 
-    ```bash
-    b$ ping -c 5 -W 1 10.0.0.3
-    ```
+     ```bash
+     b$ ping -c 5 -W 1 10.0.0.3
+     ```
 
-    Is the outcome different than it was in the previous problem?  Why or why
-    not?  Use the difference in configuration files to determine the answer.
+     Is the outcome different than it was in the previous problem?  Why or why
+     not?  Use the difference in configuration files to determine the answer.
