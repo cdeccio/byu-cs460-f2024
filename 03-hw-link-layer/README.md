@@ -115,9 +115,9 @@ s1$ sudo ovs-appctl fdb/flush s2
     s1$ sudo ovs-appctl fdb/show s2
     ```
 
-    Which entries make up `s1`'s switch table?
+    For which hosts are there entries in `s1`'s switch table?
 
- 2. Which entries make up `s2`'s switch table?
+ 2. For which hosts are there entries in `s2`'s switch table?
 
  3. Run the following command on `b` to send a single frame from `b` to `e`:
    
@@ -137,15 +137,17 @@ s1$ sudo ovs-appctl fdb/flush s2
     on which a frame was seen can be found in the "Frame" layer in Wireshark.
     Each interface name corresponds to the names of the two devices to which it
     is connected, e.g., interface `a-s1` represents the interface on host `a`
-    that connects it to switch `s1`.
+    that connects it to switch `s1`.  Also, do not include the original frame
+    from `b` to `s1`; only indicate `b` if you see a second frame that was
+    forwarded from `s1` to `b`.
 
 
  4. On which link(s) (i.e., between which two network components) do/does the
-    frame(s) include an 802.1Q frame header?  What is the value of the ID field
-    in the 802.1Q header of that frame?
+    frame(s) include an 802.1Q frame header?
 
+ 5. What is the value of the ID field in the 802.1Q header of that frame?
     
- 5. Run the following command on `s1` to show the state of the MAC address
+ 6. Run the following command on `s1` to show the state of the MAC address
     tables:
 
     ```bash
@@ -153,12 +155,16 @@ s1$ sudo ovs-appctl fdb/flush s2
     s1$ sudo ovs-appctl fdb/show s2
     ```
 
-    Which entries now make up `s1`'s switch table?
+    (Note: entries expire after five minutes, so if no entries show up, then
+    re-run the `ping` command from question 3 to re-create any entries.)
 
- 6. Which entries make up `s2`'s switch table?
+    For which hosts are there entries in `s1`'s switch table?
 
 
- 7. Run the following command on `e` to send a single frame from `e` to `b`:
+ 7.  For which hosts are there entries in `s2`'s switch table?
+
+
+ 8. Run the following command on `e` to send a single frame from `e` to `b`:
    
     ```bash
     e$ ping -c 1 -W 1 10.0.0.2
@@ -169,7 +175,7 @@ s1$ sudo ovs-appctl fdb/flush s2
     Which links saw the frame from `e` to `b`?
 
 
- 8. Run the following command on `s1` to show the state of the MAC address
+ 9. Run the following command on `s1` to show the state of the MAC address
     tables:
 
     ```bash
@@ -180,30 +186,30 @@ s1$ sudo ovs-appctl fdb/flush s2
     What entries are now in the tables?
 
 
- 9. Go back to the terminal from which you started the network.  It should say:
-    `Ctrl-c to quit`.  Now enter `Ctrl`-`c`.  Then re-start the network with
-    the following:
+ 10. Go back to the terminal from which you started the network.  It should say:
+     `Ctrl-c to quit`.  Now enter `Ctrl`-`c`.  Then re-start the network with
+     the following:
    
-    ```bash
-    $ cougarnet --display --disable-ipv6 h6-s2-vlan.cfg
-    ```
+     ```bash
+     $ cougarnet --display --disable-ipv6 h6-s2-vlan.cfg
+     ```
 
-    Note that you haven't enabled firewalls as you did
-    [previously](#prepare-the-host-for-link-layer-analysis).
-    Now run the following from host `b`:
+     Note that you haven't enabled firewalls as you did
+     [previously](#prepare-the-host-for-link-layer-analysis).
+     Now run the following from host `b`:
 
-    ```bash
-    b$ ping -c 5 -W 1 10.0.0.5
-    ```
+     ```bash
+     b$ ping -c 5 -W 1 10.0.0.5
+     ```
 
-    Then:
+     Then:
 
-    ```bash
-    b$ ping -c 5 -W 1 10.0.0.3
-    ```
+     ```bash
+     b$ ping -c 5 -W 1 10.0.0.3
+     ```
 
-    What is the difference between pinging `e` and pinging `c`?  Why is there a
-    difference?
+     What is the difference between pinging `e` and pinging `c`?  Why is there a
+     difference?
 
 
  10. Now stop (`Ctrl`-`c`) the network and re-start a variant of the previous
