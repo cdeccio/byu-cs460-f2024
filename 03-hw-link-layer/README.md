@@ -133,14 +133,13 @@ s1$ sudo ovs-appctl fdb/flush s2
     column.  The rows in the captures all represent the same frame as seen by
     different interfaces.
 
-    Which links saw the frame from `b` to `e`?  Hint: the name of the interface
-    on which a frame was seen can be found in the "Frame" layer in Wireshark.
-    Each interface name corresponds to the names of the two devices to which it
-    is connected, e.g., interface `a-s1` represents the interface on host `a`
-    that connects it to switch `s1`.  Also, do not include the original frame
-    from `b` to `s1`; only indicate `b` if you see a second frame that was
-    forwarded from `s1` to `b`.
-
+    Which hosts observed the frame from `b` to `e`?  Hint: the name of the
+    interface on which a frame was seen can be found in the "Frame" layer in
+    Wireshark.  Each interface name corresponds to the names of the two devices
+    to which it is connected, e.g., interface `a-s1` represents the interface
+    on host `a` that connects it to switch `s1`.  Also, do not include the
+    original frame from `b` to `s1`; only indicate `b` if you see a second
+    frame that was forwarded from `s1` to `b`.
 
  4. On which link(s) (i.e., between which two network components) do/does the
     frame(s) include an 802.1Q frame header?
@@ -160,7 +159,6 @@ s1$ sudo ovs-appctl fdb/flush s2
 
     For which hosts are there entries in `s1`'s switch table?
 
-
  7.  For which hosts are there entries in `s2`'s switch table?
 
 
@@ -172,8 +170,7 @@ s1$ sudo ovs-appctl fdb/flush s2
 
     Look again at the running packet capture, sorted by the "Time" column.
 
-    Which links saw the frame from `e` to `b`?
-
+    Which hosts observed the frame from `e` to `b`?
 
  9. Run the following command on `s1` to show the state of the MAC address
     tables:
@@ -183,10 +180,11 @@ s1$ sudo ovs-appctl fdb/flush s2
     s1$ sudo ovs-appctl fdb/show s2
     ```
 
-    What entries are now in the tables?
+    For which hosts are there entries in `s1`'s switch table?
 
+ 10. For which hosts are there entries in `s2`'s switch table?
 
- 10. Go back to the terminal from which you started the network.  It should say:
+ 11. Go back to the terminal from which you started the network.  It should say:
      `Ctrl-c to quit`.  Now enter `Ctrl`-`c`.  Then re-start the network with
      the following:
    
@@ -212,7 +210,7 @@ s1$ sudo ovs-appctl fdb/flush s2
      difference?
 
 
- 10. Now stop (`Ctrl`-`c`) the network and re-start a variant of the previous
+ 12. Now stop (`Ctrl`-`c`) the network and re-start a variant of the previous
      configuration with:
     
      ```bash
