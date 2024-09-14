@@ -40,7 +40,7 @@ with six hosts: `a` through `c` connected to switch `s1`, `d` through `f`
 connected to switch `s2`, and `s1` and `s2` connected to each other.  Also,
 hosts `a`, `b`, `d`, and `e` are on VLAN 25, while hosts `c` and `f` are on
 VLAN 30.
-   
+
 Run the following command to create and start the network:
 
 ```bash
@@ -120,7 +120,7 @@ s1$ sudo ovs-appctl fdb/flush s2
  2. For which hosts are there entries in `s2`'s switch table?
 
  3. Run the following command on `b` to send a single frame from `b` to `e`:
-   
+
     ```bash
     b$ ping -c 1 -W 1 10.0.0.5
     ```
@@ -145,7 +145,7 @@ s1$ sudo ovs-appctl fdb/flush s2
     frame(s) include an 802.1Q frame header?
 
  5. What is the value of the ID field in the 802.1Q header of that frame?
-    
+
  6. Run the following command on `s1` to show the state of the MAC address
     tables:
 
@@ -163,7 +163,7 @@ s1$ sudo ovs-appctl fdb/flush s2
 
 
  8. Run the following command on `e` to send a single frame from `e` to `b`:
-   
+
     ```bash
     e$ ping -c 1 -W 1 10.0.0.2
     ```
@@ -187,7 +187,7 @@ s1$ sudo ovs-appctl fdb/flush s2
  11. Go back to the terminal from which you started the network.  It should say:
      `Ctrl-c to quit`.  Now enter `Ctrl`-`c`.  Then re-start the network with
      the following:
-   
+
      ```bash
      $ cougarnet --display --disable-ipv6 h6-s2-vlan.cfg
      ```
@@ -212,7 +212,7 @@ s1$ sudo ovs-appctl fdb/flush s2
 
  13. Now stop (`Ctrl`-`c`) the network and re-start a variant of the previous
      configuration with:
-    
+
      ```bash
      $ cougarnet --display --disable-ipv6 h6-s2.cfg
      ```
@@ -230,7 +230,7 @@ s1$ sudo ovs-appctl fdb/flush s2
      ```
 
      What are the results of pinging `e` (10.0.0.5) and pinging `c` (10.0.0.3)?
- 
+
  14. If the results are different from those when the previous configuration
      was used, why?  Use the difference in configuration files to determine the
      answer.
