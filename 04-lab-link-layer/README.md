@@ -297,13 +297,14 @@ Then implement a basic switch in `switch.py` with the following functionality:
  - A broadcast frame (i.e., having destination MAC address `ff:ff:ff:ff:ff:ff`)
    is forwarded as-is to all interfaces, except that from which it originated.
 
+Note that it might be easiest to start with basic switch functionality, then
+implement the aging time.  See the [Help](#helps) section for an
+[Ethernet frame reference](#ethernet-frames), as well as implementation tips
+and examples.
+
 Test your implementation against scenarios 1 and 2.  Determine the appropriate
 output--that is, which hosts should receive which frames--and make sure that
 the output for your switch implementation matches appropriately.
-
-See the [Help](#helps) section for an
-[Ethernet frame reference](#ethernet-frames), as well as implementation tips
-and examples.
 
 When it is working properly, test also with the `--terminal=none` option:
 
@@ -566,6 +567,18 @@ For more info see the following:
  - [`bytes` documentation](https://docs.python.org/3/library/stdtypes.html#binary-sequence-types-bytes-bytearray-memoryview)
  - [`binascii` documentation](https://docs.python.org/3/library/binascii.html)
  - [`struct` documentation](https://docs.python.org/3/library/struct.html)
+
+
+## Sending and Receiving Frames
+
+The
+[Cougarnet documentation](https://github.com/cdeccio/cougarnet/blob/main/README.md#sending-and-receiving-frames)
+explains how frames can be sent and received using the methods provided by the
+`BaseHost` class.  In particular, you will find the `physical_interfaces()`,
+`_handle_frame()`, and `send_frame()` methods very useful.  These methods are
+demonstrated in a working example of a hub (`class Hub`), which forwards frames
+like a switch but does not learn outgoing ports associated with MAC addresses (see the
+[documentation](https://github.com/cdeccio/cougarnet/blob/main/README.md#sending-and-receiving-frames)).
 
 
 ## Other Helps
