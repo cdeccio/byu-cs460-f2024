@@ -417,6 +417,6 @@ Then answer the questions.
 
  33. How many total IP fragments result from the ICMP request?
 
- 34. What are the sizes of each fragment?
+ 34. What are the sizes of each fragment, including the IP packet header?
 
- 35. What are the offsets of each fragment?
+ 35. What are the offset values of each fragment, in eight-byte words?
