@@ -374,36 +374,39 @@ h1$ ping -c 1 -W 1 10.0.1.2
 
 For each part of this problem, run the given command from `h1`, look at the
 Wireshark capture, and then respond with 1) the host or router the sent the
-ICMP error and 2) a *brief* description of why the ICMP error was sent.  For
-example, if the ICMP message is "port unreachable", do not write "port
-unreachable" but rather "the host was not listening on the requested port".
+ICMP error and 2) a *brief* description of why the ICMP error was sent.
 
- 23.
- 24. ```
-     h1$ ping -c 1 -W 1 -t 3 10.0.1.2
-     ```
-     (`-t` sets the starting TTL)
+ ```
+ h1$ ping -c 1 -W 1 -t 3 10.0.1.2
+ ```
+ (`-t` sets the starting TTL)
+
+ 23. Which device sent the ICMP message?
+ 24. What was the cause of the ICMP message?
+
+```
+h1$ ping -c 1 -W 1 10.0.1.4
+```
+ 27. Which device sent the ICMP message?
+ 28. What was the cause of the ICMP message?
 
 
- 27.
- 28. ```
-     h1$ ping -c 1 -W 1 10.0.1.4
-     ```
+```
+h1$ ping -c 1 -W 1 10.0.3.1
+```
+ 29. Which device sent the ICMP message?
+ 30. What was the cause of the ICMP message?
 
- 29.
- 30. ```
-     h1$ ping -c 1 -W 1 10.0.3.1
-     ```
-
- 31.
- 32. ```
-     h1$ dig @10.0.1.2 +timeout=1 +tries=1 . NS
-     ```
-
+```
+h1$ dig @10.0.1.2 +timeout=1 +tries=1 . NS
+```
 	(`dig` is a command-line DNS tool.  For the purposes of this
 	assignment, just know that it is sending a single UDP datagram to
 	10.0.1.2 on port 53--and also, there is nothing listening on port
         53 on `h2`. :))
+
+ 31. Which device sent the ICMP message?
+ 32. What was the cause of the ICMP message?
 
 Run the following command from `h1`, which, sends an ICMP echo request of size
 1500 to 10.0.1.2:
