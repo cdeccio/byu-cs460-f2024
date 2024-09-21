@@ -47,7 +47,7 @@ directly connected.  There are no VLANs in this scenario.
 Run the following command to create and start the network:
 
 ```bash
-cougarnet --display-file=net.png --wireshark=s1-a,s1-b,s1-r1,s2-c,s2-d,s2-r1 h6-r2.cfg
+cougarnet --display-file=net.png --wireshark=s1-a,s1-b,s1-r1,s2-c,s2-d,s2-r1,r1-r2 h6-r2.cfg
 ```
 
 The `--display` option tells `cougarnet` to print out the network layout before
@@ -62,14 +62,14 @@ capturing packets on all interfaces associated with `s1` and `s2`.
 
 Because of the current configuration, you will only see five terminals show up,
 one associated with each of hosts `a`, `c`, and `e`, and one associated with
-each of routers `r1` and `r2` (you can change this with the `--terminal`
-option).
+each of routers `r1` and `r2`.  You can change this with the `--terminal`
+option.
 
 
 ## Exercises
 
- 1. Run the following commands on host `a` to show its network interface
-    configuration, IP forwarding table, and ARP table:
+Run the following commands on host `a` to show its network interface
+configuration, IP forwarding table, and ARP table:
 
     ```bash
     a$ ip addr 2> /dev/null
@@ -77,217 +77,244 @@ option).
     a$ ip neigh
     ```
 
-    (The `2> /dev/null` simply redirects standard error, which is noisy due to
-    unknown causes related to working in a private network namespace :))
+(The `2> /dev/null` simply redirects standard error, which is noisy due to
+unknown causes related to working in a private network namespace :))
 
-    Note that while Cougarnet allows for MAC addresses to be pre-assigned in the
-    [configuration file](#configuration-1), the MAC addresses assigned to each
-    interface in this scenario are random.  That is demonstrate how they are
-    learned through ARP, without prior knowledge.  That being said, you will
-    want to take note of `a`'s MAC address for its `a-s1` interface.  It is in
-    the output of `ip addr 2> /dev/null`, following `link/ether`.
+Note that while Cougarnet allows for MAC addresses to be explicitly configured
+in the
+[configuration file](https://github.com/cdeccio/cougarnet/blob/main/README.md#configuration-1),
+in this scenario, the MAC addresses with which the interfaces are configured
+are somewhat random.  The fact that they aren't explicitly configured is to
+demonstrate how they are learned through ARP, without prior knowledge.  That
+being said, you will want to take note of `a`'s MAC address for its `a-s1`
+interface.  It is in the output of `ip addr 2> /dev/null`, following
+`link/ether`.
 
-    You should only see one entry in the forwarding table:
-    ```
-    10.0.0.0/24 dev a-s1 proto kernel scope link src 10.0.0.1
-    ```
+You should only see one entry in the forwarding table:
+```
+10.0.0.0/24 dev a-s1 proto kernel scope link src 10.0.0.1
+```
 
-    This entry means that for IP destinations matching `10.0.0.0/24`,
-    the host will send packets out interface (`dev`) `a-s1`, and that there is
-    no explicit next hop--that is, the next hop is whatever the IP
-    destination is.  This table entry is created automatically by the system
-    when interface `a-s1` is enabled with IP address `10.0.0.1/24` because it
-    now knows that it is connected to the `10.0.0.0/24` subnet and thus can
-    reach all hosts in `10.0.0.1/24` without going to a router first (i.e., the
-    "next hop").
+This entry means that for IP destinations matching `10.0.0.0/24`, the host will
+send packets out interface (`dev`) `a-s1`, and that there is no explicit next
+hop; that is, the next hop is whatever the IP destination is.  This table entry
+is created automatically by the system when interface `a-s1` is enabled with IP
+address `10.0.0.1/24` because it now knows that it is connected to the
+`10.0.0.0/24` subnet and thus can reach all hosts in `10.0.0.1/24` without
+going to a router first (i.e., the "next hop").
 
-    a. Given the current contents of the IP forwarding table, what do you
-       suspect will happen when you attempt to send an IP datagram from `a` to
-       `b` (10.0.0.2)?
+ 1. Given the current contents of the IP forwarding table, what will happen
+    when you attempt to send an IP datagram from `a` to `b` (10.0.0.2)?  You
+    will test your guess later and can update your answer, if necessary.
 
-    b. Given the current contents of the IP forwarding table, what do you
-       suspect will happen when you attempt to send an IP datagram from `a` to
-       `c` (10.0.1.2)?
+ 2. Given the current contents of the IP forwarding table, what will happen
+    when you attempt to send an IP datagram from `a` to `c` (10.0.1.2)?  You
+    will test your guess later and can update your answer, if necessary.
 
-    c. What are the current contents of `a`'s ARP table?
+ 3. Which entries are currently in `a`'s ARP table?
 
+Now run the following command on `a` to send a single packet from `a` to `b`:
 
- 2. Now run the following command on `a` to send a single packet from `a` to
-    `b`:
+```bash
+a$ ping -c 1 -W 1 10.0.0.2
+```
 
-    ```bash
-    a$ ping -c 1 -W 1 10.0.0.2
-    ```
+Look at the Wireshark window, and sort by "Time".
 
-    Look at the Wireshark window, and sort by "Time".
+ 4. Consider the very first (in terms of time) frame sent from `a` (i.e., with
+    the source MAC address that you noted in the output to `ip addr`).  What
+    was the protocol and the purpose of the packet carried by the first frame
+    sent by `a`?  (Hint: click on the frame, and look at the contents of the
+    protocol just above the Ethernet frame in the "packet details" window.)
 
-    a. Consider the very first (in terms of time) frame sent from `a`
-       (i.e., the MAC address that you noted in question 1).  What was the
-       protocol and the purpose of the packet carried by that frame? (Hint:
-       click on the frame, and look at the contents of the protocol just above
-       the Ethernet frame in the "packet details" window.)
+ 5. Which of _all_ the hosts or routers connected to `s1` or `s2` observed
+    this first frame from `a`?  Use the rows in the "packet list" window to
+    answer the question.
 
-    b. Which of _all_ the hosts or routers connected to `s1` or `s2` observed
-       this first frame from `a`?  Use the rows in the "packet list" window to
-       answer the question.
+ 6. Why did _this_ set of hosts get the frame from `a` (no more, no less)?
+    Hint: think about purpose of the packet, look at the addresses in the
+    Ethernet frame header, and consider the makeup of the network.
 
-    c. Briefly explain your answer to part b.  That is, why did _this_ set of
-       hosts get the frame (no more, no less)?  Hint: think about purpose of
-       the packet, look at the addresses in the Ethernet frame header, and
-       consider the makeup of the network.
+ 7. Which of _all_ the hosts or routers connected to `s1` or `s2` observed the
+    response from from `b`?
 
-    d. Which of _all_ the hosts or routers connected to `s1` or `s2` observed
-       the response from from `b`?
+ 8. Why did _this_ set of hosts get the frame associated with `b`'s response
+    (no more, no less)?
 
-    e. Briefly explain your answer to part d.  That is, why did _this_ set of
-       hosts get the frame (no more, no less)?
-
-    f. Was the ping successful?  That is, did you get a response?
-
-
- 3. Re-run the `ip neigh` command to see the new state of `a`'s ARP table:
-
-    ```bash
-    a$ ip neigh
-    ```
-
-    What entries are in the table?
+ 9. Was the ping successful?  That is, did `a` get a response?  (Now would be a
+    good time to revisit question 1 and ask yourself why or why not.)
 
 
- 4. Now run the following command on `a` to send a single packet from `a` to
-    `c`:
+Re-run the `ip neigh` command to see the new state of `a`'s ARP table:
 
-    ```bash
-    a$ ping -c 1 -W 1 10.0.1.2
-    ```
+```bash
+a$ ip neigh
+```
 
-    (The `-c` option tells `ping` to send just one packet, and the `-W` option
-    tells `ping` to only wait for one second for a response.)
-
-    a. Was the ping successful?  That is, did you get a response?
-
-    b. Which of _all_ the hosts or routers connected to `s1` or `s2` observed
-       frame(s) associated with the `ping` command you just issued?
+ 10. Which entries are now in `a`'s ARP table?
 
 
- 5. Let's now add an entry to `a`'s forwarding table.  The general formula is
-    this:
+Now run the following command on `a` to send a single packet from `a` to `c`:
 
-    ```
-    $ sudo ip route add <prefix> via <next_hop> dev <int>
-    ```
+```bash
+a$ ping -c 1 -W 1 10.0.1.2
+```
 
-    where `<prefix>` is an IP prefix (e.g., `192.0.2.0/24`), `<int>` is the
-    name of the interface on which outgoing packets should be sent for that
-    prefix, and `<next_hop>` is the IP address of the router on that local area
-    network (LAN) and subnet.
+(The `-c` option tells `ping` to send just one packet, and the `-W` option
+tells `ping` to only wait for one second for a response.)
 
-    In this case, you want a "default" route, which means it should match
-    _anything_.  Remember, due to longest prefix matching and the fact that
-    there is already an entry in the table for `10.0.0.0/24`, it will only
-    match this default entry when a datagram is destined for an IP address
-    outside `a`'s subnet (`10.0.0.0/24`).
+ 11. Was the ping successful?  That is, did `a` get a response?
 
-    Identify the IP prefix, the next hop IP address, and the outgoing interface
-    to create a default route for `a` using `r1`.  Then add that entry to `a`'s
-    forwarding table, using the command and description above.  Show the
-    command that you used.
+ 12. Which of _all_ the hosts or routers connected to `s1` or `s2` observed
+     _any_ frame(s) associated with the `ping` command you just issued?
+
+Let's now add an entry to `a`'s forwarding table.  The general formula is this:
+
+```
+$ sudo ip route add <prefix> via <next_hop> dev <int>
+```
+
+where `<prefix>` is an IP prefix (e.g., `192.0.2.0/24`), `<int>` is the name of
+the interface on which outgoing packets should be sent for that prefix, and
+`<next_hop>` is the IP address of the router on that local area network (LAN)
+and subnet.
+
+In this case, what we are looking to add is a "default" forwarding entry.  The
+prefix for such an entry is `0.0.0.0/0`.  Because the prefix has a length of
+zero, it matches _anything_.  However, because the more specific (i.e., longer)
+prefix `10.0.0.0/24` is also in the table, and longest prefix match is used,
+the default entry will only be selected if a datagram is destined for something
+other than `10.0.0.0/24`.  Thus, only datagrams destined for addresses outside
+`a`'s subnet will match the default forwarding entry.
+
+The outgoing interface is the name of the interface out which datagrams
+destined for the default forwarding entry should be sent.  Since `a` has only
+one interface, there is no ambiguity; all datagrams should go out interface
+`a-s1`.
+
+The next-hop IP address for the default forwarding entry is the IP address of
+the router to which datagrams destined for addresses that don't match any
+more-specific entry should be sent.  In this case, the router is `r1`. (Not
+`s1`!  Rememember that switches are link-layer (layer-2) devices and are
+network-layer (layer-3) agnostic.)  However, `r1` has multiple interfaces and
+an IP address for each!  Which one should be used for the next-hop IP address?
+It must be the IP address for the interface that is on the same LAN---and thus
+has an IP address in the same subnet---as the outgoing interface.  Since the
+outgoing interface is `a-s1`, then `r1`'s corresponding interface is `r1-s1`
+(not `r1-s2`, which is on a different LAN and has an IP address in a different
+subnet).  So the next-hop IP address is 10.0.0.3.  Note that for end systems
+like `a` and `b` (as opposed to routers, which have multiple interfaces), the
+router's IP address, corresponding to the default forwarding entry, is known as
+the *gateway*: it is the only way out for these hosts!
+
+Use the `ip route` command with the values explained in the preceding
+paragraphs to set run the default forwarding entry for host `a`.
+
+Again run the following command on `a` to send a single packet from `a` to `c`:
+
+```bash
+a$ ping -c 1 -W 1 10.0.1.2
+```
+
+ 13. Consider the very first (in terms of time) frame sent from `r1` on
+     `r1-s2`. (To find the MAC address of `r1-s2`, run `ip addr 2> /dev/null`
+     on `r1`).  What was the protocol and the purpose of the packet carried by
+     the first frame sent by `r1`? (Hint: click on the frame, and look at the
+     contents of the protocol just above the Ethernet frame in the "packet
+     details" window.)
+
+ 14. Which of _all_ the hosts or routers connected to `s1` or `s2` observed
+     this first frame from `r1`?  Use the rows in the "packet list" window to
+     answer the question.
+
+ 15. Why did _this_ set of hosts get the frame from `r1` (no more, no less)?
+     Hint: think about purpose of the packet, look at the addresses in the
+     Ethernet frame header, and consider the makeup of the network.
+
+ 16. Was the ping successful?  That is, did `a` get a response?
+
+Run the `ip neigh` command on `r1` to see the state of its ARP table:
+
+ ```bash
+ r1$ ip neigh
+ ```
+
+ 17. Which entries are in `r1`'s ARP table?
+
+ 18. Why does `r1` have ARP entries for multiple subnets?
+
+Add a default forwarding entry to host `c`.  Use the instructions above to add
+a default forwarding entry.  You will need to adapt them for `c` instead of
+`a`.  This default forwarding entry will enable `c` to send messages to hosts
+outside its subnet, including the ping response to `a`.
+
+Again run the following command on `a` to send a single packet from `a` to `c`:
+
+```bash
+a$ ping -c 1 -W 1 10.0.1.2
+```
+
+ 19. Was the ping successful?  That is, did `a` get a response?  Hint: at this
+     point, it should be.
+
+Run the following command on `a` to send a single packet from `a` to `e`:
+
+```bash
+a$ ping -c 1 -W 1 10.0.3.2
+```
+
+ 20. Was the ping successful?  That is, did `a` get a response?
 
 
- 6. Again run the following command on `a` to send a single packet from `a` to
-    `c`:
+You have created forwarding entries in `a` and `c` that direct them to send
+datagrams destined for addresses outside their own subnets to `r1`.  However,
+look at `r1`'s forwarding tables using the `ip route` command.  It only has
+entries corresponding to the subnets in which it has interfaces.  It is the
+same for `r2`.  That means that they have no matching entry for datagrams
+destined for subnets other the ones to which they are directly connected.
 
-    ```bash
-    a$ ping -c 1 -W 1 10.0.1.2
-    ```
+What is needed then for `a` to send a datagram to `e`?  Router `r1` needs a
+forwarding entry to direct datagrams destined for the `10.0.3.0/24` subnet to
+`r2`.  Relatedly, what is needed for `e` to send a datagram to `a`?  Router
+`r2` needs a forwarding entry to direct datagrams destined for the
+`10.0.0.0/24` subnet to `r1`.
 
-    a. Consider the very first (in terms of time) frame sent from `r1` on
-       `r1-s2`. (To find the MAC address of `r1-s2`, run `ip addr 2> /dev/null`
-       on `r1`).  What was the protocol and the purpose of the packet carried
-       by that frame? (Hint: click on the frame, and look at the contents of
-       the protocol just above the Ethernet frame in the "packet details"
-       window.)
+On `r1` and `r2` use the `ip route add` command to add the entries that will
+allow `a` and `c` to communicate with one another, as described previously.  In
+each case you will need to determine the appropriate IP prefixes, interface
+names, and next-hop IP addresses. Finally, add a default forwarding entry for
+host `e`, with `r2` as a gateway.  This one will be more similar to what you
+did in question
 
-    b. Which of _all_ the hosts or routers connected to `s1` or `s2` observed
-       this frame from `r1`?  Use the rows in the "packet list" window to
-       answer the question.
+Use the network diagram (i.e., `net.png`) as a reference to help you with this.
+Think carefully about what you are wanting to do in each case.
 
-    c. Briefly explain your answer to part b.  That is, why did _this_ set of
-       hosts get the frame (no more, no less)?  Hint: think about purpose of
-       the packet, look at the addresses in the Ethernet frame header, and
-       consider the makeup of the network.
+Important Note: Use `ip route` (without further arguments) frequently to see if
+the entries look correct.  If at any point add an incorrect entry into a table,
+you don't  have to start over from scratch!  You can delete an existing entry
+using `ip route del`.
 
-    d. Is it seen on any interfaces of `s1`?  Why or why not?
+Run the following command on `a` to send a single packet from `a` to `e`:
 
-    e. Was the ping successful?
+```bash
+a$ ping -c 1 -W 1 10.0.3.2
+```
 
+ 21. Was the ping successful?  That is, did `a` get a response?  Hint: it
+     should be.
 
- 7. Run the `ip neigh` command on `r1` to see the state of its ARP table:
+We will now make one last change to our network.  Add a default forwarding
+entry for `r1` that has matching datagrams go towards `r2` (i.e., out interface
+`r1-r2`).  Then add a default forwarding entry for `r2` that has matching
+datagrams go towards `r1` (i.e., out interface `r2-r1`).  What will happen when
+you send a datagram from `a` to destination `8.8.8.8`?  Answer the question to
+yourself before testing it.  Then run the following to actually test it:
 
-    ```bash
-    r1$ ip neigh
-    ```
+```bash
+a$ ping -c 1 -W 1 10.0.3.2
+```
 
-    What entries are in the table?
-
-
- 8. Follow the instructions from problem 5 to add the appropriate default route
-    to host `c`, so it can send response messages to hosts outside its subnet.
-    Show the command you used.
-
-
- 9. Again run the following command on `a` to send a single packet from `a` to
-    `c`:
-
-    ```bash
-    a$ ping -c 1 -W 1 10.0.1.2
-    ```
-
-    Was it successful?  Hint: it should be.
-
- 10. What is the outcome of running the following on `a` and `c`, respectively?
-
-     ```bash
-     a$ ping -c 1 -W 1 10.0.3.2
-     ```
-
-     ```bash
-     c$ ping -c 1 -W 1 10.0.3.2
-     ```
-
-     Hint: neither should work.
-
- 11. Take a look at the forwarding table entries for `r1` and `r2`.  Note that
-     they only have entries for the subnets for which they have interfaces.
-     For `r1`, add entries for the _specific_ subnets to which `r2` is directly
-     connected, and vice-versa.  You should use the `ip route` command that you
-     used in question 5, but you will need to determine the appropriate IP
-     prefixes, interface names, and next hop IP addresses, which will all be
-     different for this one. Finally, add a forwarding entry for the _default_
-     route to host `e`.  This one will be more similar to what you did in
-     question 5.
-
-     Taking a good look at the network diagram (i.e., `net.png`) will help you
-     with this.  Think carefully about what you are wanting to do in each case.
-
-     a. Show the command you used to add the appropriate entry to `r1`.
-
-     b. Show the command you used to add the appropriate entries to `r2`.
-
-     c. Show the command you used to add the appropriate entry to `e`.
-
- 12. Now what is the outcome of running the following on `a` and `c`,
-     respectively?
-
-     ```bash
-     a$ ping -c 1 -W 1 10.0.3.2
-     ```
-
-     ```bash
-     c$ ping -c 1 -W 1 10.0.3.2
-     ```
-
-     Hint: they should both work.
+ 22. What happened with the ICMP echo request?
 
 
 Stop `cougarnet` by entering `ctrl`-`c` at the terminal where it was launched.
@@ -333,64 +360,63 @@ By default, all terminals will show up, but you can adjust this with the
 
 ## Exercises
 
- 13. Run the following to send an ICMP echo request/reply between `h1` and
-     `h2`: 
+Run the following to send an ICMP echo request/reply between `h1` and `h2`:
 
+```
+h1$ ping -c 1 -W 1 10.0.1.2
+```
+
+ 23. What is the TTL reported by `ping`?
+
+ 24. Considering that Linux, by default, uses a starting TTL of 64 for IP
+     packets that it creates, how many "hops" (i.e., routers) did the ICMP echo
+     response pass through?
+
+For each part of this problem, run the given command from `h1`, look at the
+Wireshark capture, and then respond with 1) the host or router the sent the
+ICMP error and 2) a *brief* description of why the ICMP error was sent.  For
+example, if the ICMP message is "port unreachable", do not write "port
+unreachable" but rather "the host was not listening on the requested port".
+
+ 23.
+ 24. ```
+     h1$ ping -c 1 -W 1 -t 3 10.0.1.2
      ```
-     h1$ ping -c 1 -W 1 10.0.1.2
+     (`-t` sets the starting TTL)
+
+
+ 27.
+ 28. ```
+     h1$ ping -c 1 -W 1 10.0.1.4
      ```
 
-     What is the TTL reported by `ping`?  Considering that Linux, by default,
-     uses a starting TTL of 64 for IP packets that it creates, how many hops
-     (i.e., routers) did the ICMP echo response pass through?
+ 29.
+ 30. ```
+     h1$ ping -c 1 -W 1 10.0.3.1
+     ```
 
- 14. For each part of this problem, run the given command from `h1`, look at
-     the Wireshark capture, and then respond with 1) the host or router the
-     sent the ICMP error and 2) a *brief* description of why the ICMP error
-     was sent.  For example, if the ICMP message is "port unreachable", do not
-     write "port unreachable" but rather "the host was not listening on the
-     requested port".
+ 31.
+ 32. ```
+     h1$ dig @10.0.1.2 +timeout=1 +tries=1 . NS
+     ```
 
-     a. 
-        ```
-        h1$ ping -c 1 -W 1 -t 3 10.0.1.2
-        ```
-        (`-t` sets the starting TTL)
-        
-     b.
-        ```
-        h1$ ping -c 1 -W 1 10.0.1.2 
-        ```
-
-     c.
-        ```
-        h1$ ping -c 1 -W 1 10.0.1.4
-        ```
-
-     d.
-        ```
-        h1$ ping -c 1 -W 1 10.0.3.1
-        ```
-
-     e.
-        ```
-        h1$ dig @10.0.1.2 +timeout=1 +tries=1 . NS
-        ```
 	(`dig` is a command-line DNS tool.  For the purposes of this
 	assignment, just know that it is sending a single UDP datagram to
 	10.0.1.2 on port 53--and also, there is nothing listening on port
         53 on `h2`. :))
-    
 
- 15. Run the following command from `h1`, which, sends an ICMP echo request of
-     size 1500 to 10.0.1.2:
+Run the following command from `h1`, which, sends an ICMP echo request of size
+1500 to 10.0.1.2:
 
-     ```
-     h1$ ping -c 1 -W 1 -s 1500 -M dont 10.0.1.2
-     ```
+```
+h1$ ping -c 1 -W 1 -s 1500 -M dont 10.0.1.2
+```
 
-     a. How many fragments result from the single IP datagram?
+Use wireshark to analyze the IP fragments resulting from the ICMP echo request.
+Then answer the questions.
 
-     b. What are the sizes of each fragment?
+ 33. How many total IP fragments result from the ICMP request?
 
-     c. What are the offsets of each fragment?
+ 34. What are the sizes of each fragment?
+
+ 35. What are the offsets of each fragment?
