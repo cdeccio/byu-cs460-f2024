@@ -194,7 +194,6 @@ wide.
 <tr>
 <td colspan="32">Options and padding :::</td></tr>
 </table>
-(See also http://www.networksorcery.com/Enp/protocol/ip.htm)
 
  - Version - IP version.  This will always be 4 for the IPv4 header.
  - IHL - Internet header length in 4-byte words.  The IPv4 header is 20 bytes long without
@@ -231,7 +230,6 @@ wide.
 <td colspan="16">Length</td>
 <td colspan="16">Checksum</td></tr>
 </table>
-(See also http://www.networksorcery.com/Enp/protocol/udp.htm)
 
  - Source Port
  - Destination Port
@@ -268,7 +266,6 @@ wide.
 <tr>
 <td colspan="32">Options and padding :::</td></tr>
 </table>
-(See also http://www.networksorcery.com/Enp/protocol/tcp.htm)
 
  - Source Port
  - Destination Port

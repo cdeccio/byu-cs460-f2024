@@ -380,8 +380,6 @@ format:
 <td colspan="32">Data :::</td></tr>
 </table>
 
-(See also http://www.networksorcery.com/Enp/protocol/arp.htm)
-
 Regarding the fields:
  - Hardware Type will always be Ethernet (`ARPHRD_ETHER = 1`)
  - Protocol Type will always be IPv4 (`ETH_P_IP = 0x0800`)
@@ -764,7 +762,6 @@ instances.  The packet that you will be receiving looks like this:
 <tr>
 <td colspan="32">Options and padding :::</td></tr>
 </table>
-(See also http://www.networksorcery.com/Enp/protocol/ip.htm)
 
 
 ### Address Representation Conversion
