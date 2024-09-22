@@ -381,8 +381,8 @@ ICMP error and 2) a *brief* description of why the ICMP error was sent.
  ```
  (`-t` sets the starting TTL)
 
- 23. Which device sent the ICMP message?
- 24. What was the cause of the ICMP message?
+ 25. Which device sent the ICMP message?
+ 26. What was the cause of the ICMP message?
 
 ```
 h1$ ping -c 1 -W 1 10.0.1.4
