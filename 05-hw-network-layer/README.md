@@ -71,11 +71,11 @@ option.
 Run the following commands on host `a` to show its network interface
 configuration, IP forwarding table, and ARP table:
 
-    ```bash
-    a$ ip addr 2> /dev/null
-    a$ ip route
-    a$ ip neigh
-    ```
+```bash
+a$ ip addr 2> /dev/null
+a$ ip route
+a$ ip neigh
+```
 
 (The `2> /dev/null` simply redirects standard error, which is noisy due to
 unknown causes related to working in a private network namespace :))
@@ -280,7 +280,7 @@ forwarding entry to direct datagrams destined for the `10.0.3.0/24` subnet to
 `10.0.0.0/24` subnet to `r1`.
 
 On `r1` and `r2` use the `ip route add` command to add the entries that will
-allow `a` and `c` to communicate with one another, as described previously.  In
+allow `a` and `e` to communicate with one another, as described previously.  In
 each case you will need to determine the appropriate IP prefixes, interface
 names, and next-hop IP addresses. Finally, add a default forwarding entry for
 host `e`, with `r2` as a gateway.  This one will be more similar to what you
@@ -311,7 +311,7 @@ you send a datagram from `a` to destination `8.8.8.8`?  Answer the question to
 yourself before testing it.  Then run the following to actually test it:
 
 ```bash
-a$ ping -c 1 -W 1 10.0.3.2
+a$ ping -c 1 -W 1 8.8.8.8
 ```
 
  22. What happened with the ICMP echo request?
