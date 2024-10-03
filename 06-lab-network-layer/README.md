@@ -30,7 +30,9 @@ and a router!
  - [Automated Testing](#automated-testing)
  - [Evaluation](#evaluation)
  - [General Helps](#general-helps)
- - [Putting the Pieces Together (Optional)](#putting-the-pieces-together-optional)
+ - [Looking Ahead (Optional)](#looking-ahead-optional)
+   - [Add Ethernet Switch](#add-ethernet-switch)
+   - [Handle IP Broadcasts](#handle-ip-broadcasts)
  - [Submission](#submission)
 
 
@@ -849,12 +851,22 @@ following distribution:
    Please ensure that it remains private!
 
 
-# Putting the Pieces Together (Optional)
+# Looking Ahead (Optional)
 
-With working implementations of ARP and IP forwarding, you may now bring in
-your own switch implementation that you completed in the last lab.  To do this,
-copy your working `switch.py` into your current directory, and then run the
-following:
+The [final lab](../13-lab-full-stack-network/) for this class will put
+together all the network components implemented in the previous labs, including
+this lab.  This section helps you add some of the components that are not
+required for the current lab but that you will need for the final lab.  You are
+not required to implement them now, but if you want to be more prepared for the
+final lab, you might find it advantageous to do so.
+
+
+## Add Switch
+
+To integrate the switch that you implemented in the previous lab, copy your
+working `switch.py` from the
+[Link Layer Lab](../04-lab-link-layer/) into your current directory.  Then run
+the following:
 
 ```
 $ cougarnet --disable-ipv6 --terminal=none scenario1-mine.cfg
@@ -862,6 +874,11 @@ $ cougarnet --disable-ipv6 --terminal=none scenario2-mine.cfg
 ```
 
 Yep, that is all your software moving around real frames and packets!
+
+
+## Handle IP Broadcasts
+
+(Will be added soon...)
 
 
 # Submission
