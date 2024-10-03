@@ -284,7 +284,7 @@ allow `a` and `e` to communicate with one another, as described previously.  In
 each case you will need to determine the appropriate IP prefixes, interface
 names, and next-hop IP addresses. Finally, add a default forwarding entry for
 host `e`, with `r2` as a gateway.  This one will be more similar to what you
-did in question
+did in the instructions preceding question 13.
 
 Use the network diagram (i.e., `net.png`) as a reference to help you with this.
 Think carefully about what you are wanting to do in each case.
