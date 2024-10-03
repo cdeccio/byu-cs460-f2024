@@ -262,7 +262,7 @@ In the file `host.py`, flesh out following the skeleton methods related to ARP:
 
    The method should do the following:
 
-   - Parse out the IP address and MAC address of the sender.
+   - Extract the IP address and MAC address of the sender.
    - Update its own ARP table with an entry that maps the IP address of the
      sender to the MAC address of the sender.
    - If the target IP address matches an IPv4 address on the incoming
@@ -287,7 +287,7 @@ In the file `host.py`, flesh out following the skeleton methods related to ARP:
 
    The method should do the following:
 
-   - Parse out the IP address and MAC address of the sender.
+   - Extract the IP address and MAC address of the sender.
    - Update its ARP table with an entry that maps the IP address of the
      sender to the MAC address of the sender.
    - Go through its queue of packets that were waiting for this ARP response,
@@ -304,7 +304,7 @@ In the file `host.py`, flesh out following the skeleton methods related to ARP:
 
    The method should do the following:
 
-   - Parse out the destination MAC address in the frame.
+   - Extract the destination MAC address in the frame.
    - If the destination MAC address either matches the MAC address
      corresponding to the interface on which it was received or is the
      broadcast MAC address (`ff:ff:ff:ff:ff:ff`), then call another method to
@@ -604,17 +604,25 @@ forwarding:
        for more on how to do this.  Each entry provided is a three-tuple
        consisting of prefix, outgoing interface, and next hop.
 
-     - The IP prefixes with which each interface is associated.  The prefix for
-       each interface can be found by calling the `ipv4_address_info_single()`
-       [method](https://github.com/cdeccio/cougarnet/blob/main/README.md#sending-and-receiving-frames)
-       of the host.  For each interface, the added entry should
-       consist of the IP prefix for the interface, the interface itself as the
-       outgoing interface, and a next hop of `None`.
+     - The IP prefixes associated with all the physical interfaces.  The IP
+       prefix for an interface can be derived from the IP address and prefix
+       length associated with that prefix.  The IP address and prefix length
+       can be accessed via the `address` and `prefixlen` attributes of the IP
+       address object returned by the `ipv4_address_info_single()` method
+       (documented [here](https://github.com/cdeccio/cougarnet/blob/main/README.md#sending-and-receiving-frames)).
+       With the IP address and prefix length in hand, you can use the
+       `Host.prefix_for_int()` method to retrieve the prefix, which has been
+       implemented for you.  Note that this method will only work if you have
+       implemented the helper methods in `prefix.py` properly.
 
-     Note that the way things are currently implemented, you can simply pass a `str` with
-     the value `<ip_address>/<prefix_len>` to `ForwardingTable.add_entry()`, and it
-     will mask the appropriate bits to create the prefix for you, to save you some work.
-     You can use the docstrings from `forwarding_table.py` as a guide for adding entries.
+       For each interface, the forwarding entry you add should consist of the
+       IP prefix for the interface, the name of the interface itself as the
+       outgoing interface, and a next hop IP address of `None` (i.e., because
+       it is on the same subnet).
+
+     In both of these cases, call `ForwardingTable.add_entry()` to add the
+     appropriate entries.  You can use the docstring at the top of the
+     `forwarding_table.py` file as a guide for adding entries.
 
  - `send_packet()`.  This method takes the following as an argument:
 
@@ -624,11 +632,11 @@ forwarding:
 
    The method should do the following:
 
-   - Parse the IP datagram (the IP header) to extract the destination IP
-     address.
+   - Extract the destination IP address from the datagram.  Note that you do
+     not need to parse the entire packet; you will do that in the next lab.
 
    - Find the matching entry in the host's forwarding table.  This yields a
-     two-tuple corresponding to an outgoing interface and next hop.
+     two-tuple corresponding to an outgoing interface and next hop IP address.
 
    - If the outgoing interface returned from the forwarding table lookup is
      `None`, then there is no matching route and thus no place to send the
@@ -642,7 +650,7 @@ forwarding:
      from the directly-connected prefixes above.
 
    - Call `send_packet_on_int()`, passing as arguments the IP datagram (`pkt`),
-     the outgoing interface, and the next hop.
+     the outgoing interface, and the next hop IP address.
 
  - `handle_ip()`.  This method takes the following as arguments:
 
@@ -655,35 +663,34 @@ forwarding:
 
    The method should do the following:
 
-   - Parse out the destination IP address in the packet.
+   - Extract the destination IP address from the packet.  Note that you do not
+     need to parse the entire packet; you will do that in the next lab.
+
    - Determine if this host is the final destination for the packet, based on
-     the destination IP address.  There are two ways in which this host might
-     qualify as the final destination:
+     the destination IP address.  This host qualifies as the final destination
+     if the following is true:
+
      - The destination IP address matches _any_ of the IP addresses on
        the host (i.e., not limited to the IP address on the incoming
-       interface).  You can simply iterate through every interface and compare
-       the destination with the IP address(es) of each interface.
-     - The destination IP address matches the _broadcast_ IP address
-       of the subnet associated with the interface on which the packet arrived.
-       The broadcast address for the subnet is simply the last IP address in
-       the subnet, i.e., the IP address with all the "host" bits set.  Remember
-       that you can derive the IP prefix associated with a given interface by
-       using the IP address and prefix length, both found using the
-       `ipv4_address_info_single()` method of the host.  With the prefix in
-       hand, you can use the `ip_prefix_last_address()` function that you
-       created.
+       interface).  You can use the `ipv4_addresses()` method to find all IP
+       addresses.
+
    - If the packet is destined for this host, based on the tests in the
      previous bullet, then call another method to handle the payload, depending
      on the protocol value in the IP header:
+
      - For type TCP (`IPPROTO_TCP = 6`), call `handle_tcp()`, passing the full
        IP datagram, including header.
+
      - For type UDP (`IPPROTO_UDP = 17`), call `handle_udp()`, passing the full
        IP datagram, including header.
+
      Note that if the protocol is something other than TCP or UDP, you can
      simply ignore it.
-   - If the destination IP address does not match any IP address on the system,
-     and it is not the IP broadcast, then call `not_my_packet()`, passing it
-     the full IP datagram and the interface on which it arrived.
+
+   - If the destination IP address does not match any IP address on the system, then call
+     `not_my_packet()`, passing it the full IP datagram and the interface on
+     which it arrived.
 
  - `forward_packet()`. This method takes the following as an argument:
 
@@ -691,12 +698,21 @@ forwarding:
 
    The method should do the following:
 
-   - Parse the IP datagram (the IP header) to extract the time-to-live (TTL)
-     value.  This value represents the number of remaining "hops" (i.e.,
-     routers) though which the packet can pass.
+   - Extract the time-to-live (TTL) value.  This value represents the number of
+     remaining "hops" (i.e., routers) though which the packet can pass.
+
    - Decrement the TTL value by 1.  If the resulting value is 0, then simply
      return.  Expired packets should not be forwarded.
-   - Replace the TTL in the IP datagram with the decremented value.
+
+   - Replace the TTL in the IP datagram with the decremented value.  To do this
+     you could simply extract everything before the TTL, extract everything
+     after the TTL, and put the datagram back together by concatenating the
+     first part, the TTL, and the last part. Again, you will parse the datagram
+     more thoroughly in the next lab.
+
+   - Extract the destination IP address from the packet.  Note that you do not
+     need to parse the entire packet; you will do that in the next lab.
+
    - Call `send_packet()` on the modified packet.
 
  - `not_my_packet()`. This method takes the following as arguments:
@@ -707,12 +723,12 @@ forwarding:
    The method should do the following:
 
    - If the value of the `_ip_forward` instance member is `False`, then there
-     is no need to go any further!  Simply return.  Otherwise (`True`),
-     call `forward_packet()`.
+     is no need to go any further!  Simply return;
+   - Otherwise (`_ip_forward` is `True`), call `forward_packet()`.
 
- - `handle_tcp()`, `handle_udp()`.  There is no need to
-   flesh out these methods.  They are simply placeholders for a future lab.
-   However, you can place debugging code in them, if you find it helpful.
+ - `handle_tcp()`, `handle_udp()`.  There is no need to flesh out these
+   methods.  They are placeholders for a future lab.  However, you can place
+   debugging code in them, if you find it helpful.
 
 
 ## Testing

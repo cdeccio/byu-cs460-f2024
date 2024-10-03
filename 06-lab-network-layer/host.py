@@ -11,6 +11,7 @@ from cougarnet.util import \
         mac_str_to_binary, mac_binary_to_str, \
         ip_str_to_binary, ip_binary_to_str
 
+from prefix import *
 from forwarding_table import ForwardingTable
 
 # From /usr/include/linux/if_ether.h:
@@ -70,6 +71,21 @@ class Host(BaseHost):
 
     def not_my_packet(self, pkt: bytes, intf: str) -> None:
         pass
+
+    def prefix_for_int(self, intf: str) -> str:
+        obj = self.ipv4_address_info_single(intf)
+        ip_int = ip_str_to_int(obj['address'])
+        ip_prefix_int = ip_prefix(ip_int, socket.AF_INET, obj['prefixlen'])
+        first_addr = ip_int_to_str(ip_prefix_int, socket.AF_INET)
+        return '%s/%d' % (first_addr, obj['prefixlen'])
+
+    def bcast_for_int(self, intf: str) -> str:
+        obj = self.ipv4_address_info_single(intf)
+        ip_int = ip_str_to_int(obj['address'])
+        ip_prefix_int = ip_prefix(ip_int, socket.AF_INET, obj['prefixlen'])
+        ip_bcast_int = ip_prefix_last_address(ip_prefix_int, socket.AF_INET, obj['prefixlen'])
+        bcast = ip_int_to_str(ip_bcast_int, socket.AF_INET)
+        return bcast
 
 def main():
     parser = argparse.ArgumentParser()
