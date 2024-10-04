@@ -287,7 +287,7 @@ might need to adapt these instructions.
    h. Click "Play".
 
 5. Follow steps 8 through 11 from the
-   [VirtualBox instructions](#virtualbox-amd64-only).
+   [VirtualBox instructions](#virtualbox-7x-for-windows-linux-and-macos-amd64-only).
 
    Before the system reboots (the final installation step), "remove" the
    install CD by doing the following within the host system:
@@ -357,4 +357,4 @@ might need to adapt these instructions.
 
 
 10. Follow steps 17 through 21 from the
-   [VirtualBox instructions](#virtualbox-amd64-only).
+   [VirtualBox instructions](#virtualbox-7x-for-windows-linux-and-macos-amd64-only).
