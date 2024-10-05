@@ -400,10 +400,10 @@ h1$ ping -c 1 -W 1 10.0.3.1
 ```
 h1$ dig @10.0.1.2 +timeout=1 +tries=1 . NS
 ```
-	(`dig` is a command-line DNS tool.  For the purposes of this
-	assignment, just know that it is sending a single UDP datagram to
-	10.0.1.2 on port 53--and also, there is nothing listening on port
-        53 on `h2`. :))
+(`dig` is a command-line DNS tool.  For the purposes of this
+assignment, just know that it is sending a single UDP datagram to
+10.0.1.2 on port 53--and also, there is nothing listening on port 53
+on `h2`. :))
 
  31. Which device sent the ICMP message?
  32. What was the cause of the ICMP message?
