@@ -32,7 +32,7 @@ and a router!
  - [General Helps](#general-helps)
  - [Looking Ahead (Optional)](#looking-ahead-optional)
    - [Add Ethernet Switch](#add-ethernet-switch)
-   - [Handle IP Broadcasts](#handle-ip-broadcasts)
+   - [Handle IP Broadcasts](#handle-ip-subnet-level-broadcasts)
  - [Submission](#submission)
 
 
@@ -858,7 +858,7 @@ not required to implement them now, but if you want to be more prepared for the
 final lab, you might find it advantageous to do so.
 
 
-## Add Switch
+## Add Ethernet Switch
 
 To integrate the switch that you implemented in the previous lab, copy your
 working `switch.py` from the
