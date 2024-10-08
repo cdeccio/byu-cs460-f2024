@@ -670,12 +670,9 @@ forwarding:
 
    - Determine if this host is the final destination for the packet, based on
      the destination IP address.  This host qualifies as the final destination
-     if the following is true:
-
-     - The destination IP address matches _any_ of the IP addresses on
-       the host (i.e., not limited to the IP address on the incoming
-       interface).  You can use the `ipv4_addresses()` method to find all IP
-       addresses.
+     if the destination IP address matches _any_ of the IP addresses on the
+     host (i.e., not limited to the IP address on the incoming interface).  You
+     can use the `ipv4_addresses()` method to find all IP addresses.
 
    - If the packet is destined for this host, based on the tests in the
      previous bullet, then call another method to handle the payload, depending
@@ -876,10 +873,78 @@ $ cougarnet --disable-ipv6 --terminal=none scenario2-mine.cfg
 Yep, that is all your software moving around real frames and packets!
 
 
-## Handle IP Broadcasts
+## Handle IP Subnet-Level Broadcasts
 
-(Will be added soon...)
+So far in this lab, the logic for sending and receiving IP datagrams has been
+based on the destination IP address of a datagram being an _exact match_ for
+its destination, i.e., included in the tuple returned by `ipv4_addresses()`.
+However, there are circumstances in which a host might want to send a packet to
+all systems on its subnet.  In this case, it will use the broadcast IP address
+associated with its subnet (i.e., the last address in the subnet) as the
+destination IP address for the IP datagram.  We need to thus modify our logic
+such that these datagrams are _sent_ to all hosts on the subnet and _handled_
+by every host (on the subnet) that receives it, as if it were an exact match.
 
+
+### Receiving IP Broadcasts
+
+When you coded `Host.handle_ip()`, the datagrams were accepted as their final
+destination if the destination IP address was in the tuple returned by
+`ipv4_addresses()`.  Modify the logic such that a datagram is also accepted as
+its final destination if the destination IP address exactly matches the
+broadcast IP address of the subnet associated with the interface on which it
+was received.  You can use the `bcast_for_int()` method to get this address.
+
+
+### Sending IP Broadcasts
+
+You coded `Host.send_packet_on_int()` to check the host's ARP table for an
+entry corresponding to the next-hop IP address; if no entry is found, it sends
+an ARP request.  However, in the case that the destination IP address is the
+subnet's broadcast address, the packet itself is intended to go to every host
+on the LAN.  And of course, no host has an interface configured with the
+broadcast IP address (i.e., because it is special address designed for the very
+purpose of designating that a packet be sent to every host).  Thus, such an ARP
+request would go unanswered.  ARP simply does not make sense when dealing with
+a subnet-level IP broadcast.
+
+If ARP does not apply then, what shall be used as the destination MAC address
+for an IP datagram destined for the subnet's broadcast IP address?  You guessed
+it: the destination MAC address will simply be the broadcast Ethernet address,
+i.e., `ff:ff:ff:ff:ff:ff`.
+
+Modify `Host.send_packet_on_int()` to check if the destination IP address of
+the packet being sent matches the broadcast IP address for the subnet
+corresponding to the interface on which it is being sent.  Again, you can use
+the `bcast_for_int()` method to get this address.  If the destination IP
+address matches the subnet's broadcast IP address, then simply use the
+broadcast MAC address (ff:ff:ff:ff:ff:ff) as the destination MAC address.  At
+this point, you can build and send the frames; no ARP request is necessary!
+However, if the destination IP address is not the broadcast IP address, then
+proceed with checking your ARP table and sending an ARP request, if necessary.
+
+
+### Testing
+
+To test your handling of IP subnet-level broadcasts, use the following: 
+
+```
+$ cougarnet --disable-ipv6 --terminal=none scenario3-opt.cfg
+```
+
+This is the same topology as that used 
+[Part 1](#part-1---address-resolution-protocol-arp).  However, the packets sent are the following:
+
+ - 4 seconds: UDP packet sent from `a` to the IP subnet broadcast address
+   (10.0.0.255).
+   - No ARP request should be seen.
+   - The corresponding frame should be broadcast to all hosts on the LAN/subnet
+     (except the sending host).
+   - Note that this also checks that packets of type UDP are being sent to the
+     `handle_udp()` method.
+ - 5 seconds: UDP packet sent from `b` to the IP subnet broadcast address
+   (10.0.0.255).
+   - Same behaviors as the previous bullet.
 
 # Submission
 
