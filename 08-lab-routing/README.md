@@ -201,27 +201,27 @@ In scenario, routers `r1` through `r5` are connected in a line.
 
 ### Scenario 2
 
-In scenario, routers `r1` through `r5` are connected in a ring.
+In scenario, routers `r1` through `r6` are connected in a ring.
 
 ```
     r1 --- r2
-    |        \
-    |         \
-    |          r3
-    |         /
-    |        /
+   /         \
+  /           \
+ r6            r3
+  \           /
+   \         /
     r5 --- r4
 ```
 
-After some time, the link between `r1` and `r5` is dropped:
+After some time, the link between `r1` and `r6` is dropped:
 
 ```
     r1 --- r2
-             \
-    |         \
-   XXX         r3
-    |         /
-             /
+  XX         \
+              \
+ r6            r3
+  \           /
+   \         /
     r5 --- r4
 ```
 
@@ -298,10 +298,10 @@ distance vectors and forwarding table entries have been updated properly.
 
 ### Scenario 2
 
- - 4 seconds: ICMP packet sent from `r2` to `r5` and back again
+ - 4 seconds: ICMP packet sent from `r2` to `r6` and back again
  - 5 seconds: ICMP packet sent from `r2` to `r4` and back again
- - 6 seconds: Link dropped between `r1` and `r5`
- - 12 seconds: ICMP packet sent from `r2` to `r5` and back again
+ - 6 seconds: Link dropped between `r1` and `r6`
+ - 12 seconds: ICMP packet sent from `r2` to `r6` and back again
  - 13 seconds: ICMP packet sent from `r2` to `r4` and back again
 
 

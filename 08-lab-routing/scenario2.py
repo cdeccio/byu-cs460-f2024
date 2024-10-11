@@ -44,21 +44,21 @@ class SimHost1(SimHost):
     def schedule_items(self):
         loop = asyncio.get_event_loop()
         loop.call_later(START_TIME, self.log, 'START')
-        loop.call_later(START_TIME + 3, self.drop_link, 'r1-r5')
+        loop.call_later(START_TIME + 3, self.drop_link, 'r1-r6')
         loop.call_later(START_TIME + 12, self.log, 'STOP')
 
 class SimHost2(SimHost):
     def schedule_items(self):
         loop = asyncio.get_event_loop()
-        loop.call_later(START_TIME + 1, self.send_icmp_echo, 'r5')
+        loop.call_later(START_TIME + 1, self.send_icmp_echo, 'r6')
         loop.call_later(START_TIME + 2, self.send_icmp_echo, 'r4')
-        loop.call_later(START_TIME + 9, self.send_icmp_echo, 'r5')
+        loop.call_later(START_TIME + 9, self.send_icmp_echo, 'r6')
         loop.call_later(START_TIME + 10, self.send_icmp_echo, 'r4')
 
-class SimHost5(SimHost):
+class SimHost6(SimHost):
     def schedule_items(self,):
         loop = asyncio.get_event_loop()
-        loop.call_later(START_TIME + 3, self.drop_link, 'r5-r1')
+        loop.call_later(START_TIME + 3, self.drop_link, 'r6-r1')
 
 def main():
     hostname = socket.gethostname()
@@ -66,8 +66,8 @@ def main():
         cls = SimHost1
     elif hostname == 'r2':
         cls = SimHost2
-    elif hostname == 'r5':
-        cls = SimHost5
+    elif hostname == 'r6':
+        cls = SimHost6
     else:
         cls = SimHost
 

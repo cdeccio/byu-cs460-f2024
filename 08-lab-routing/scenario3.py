@@ -63,7 +63,7 @@ class SimHost9(SimHost):
 class SimHost6(SimHost):
     def schedule_items(self):
         loop = asyncio.get_event_loop()
-        loop.call_later(START_TIME + 5, self.send_icmp_echo, 'r14')
+        loop.call_later(START_TIME + 5, self.send_icmp_echo, 'r15')
 
 class SimHost7(SimHost):
     def schedule_items(self):

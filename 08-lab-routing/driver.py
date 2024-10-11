@@ -193,7 +193,7 @@ class Scenario2(Lab3Tester):
 
     expected_observations = [
             [('ICMP', ['r1']),
-                ('ICMP', ['r5']),
+                ('ICMP', ['r6']),
                 ('ICMP', ['r1']),
                 ('ICMP', ['r2'])],
             [('ICMP', ['r3']),
@@ -208,6 +208,8 @@ class Scenario2(Lab3Tester):
             None,
             [('ICMP', ['r3']),
                 ('ICMP', ['r4']),
+                ('ICMP', ['r5']),
+                ('ICMP', ['r6']),
                 ('ICMP', ['r5']),
                 ('ICMP', ['r4']),
                 ('ICMP', ['r3']),
@@ -259,6 +261,8 @@ class Scenario3(Lab3Tester):
                 ('ICMP', ['r9'])],
             [('ICMP', ['r1']),
                 ('ICMP', ['r2']),
+                ('ICMP', ['r14']),
+                ('ICMP', ['r15']),
                 ('ICMP', ['r14']),
                 ('ICMP', ['r2']),
                 ('ICMP', ['r1']),
