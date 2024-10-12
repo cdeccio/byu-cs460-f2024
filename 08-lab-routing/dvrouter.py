@@ -120,6 +120,13 @@ class DVRouter(BaseHost):
     def update_dv(self) -> None:
         pass
 
+    def prefix_for_int(self, intf: str) -> str:
+        obj = self.ipv4_address_info_single(intf)
+        ip_int = ip_str_to_int(obj['address'])
+        ip_prefix_int = ip_prefix(ip_int, socket.AF_INET, obj['prefixlen'])
+        first_addr = ip_int_to_str(ip_prefix_int, socket.AF_INET)
+        return '%s/%d' % (first_addr, obj['prefixlen'])
+
     def bcast_for_int(self, intf: str) -> str:
         obj = self.ipv4_address_info_single(intf)
         ip_int = ip_str_to_int(obj['address'])
