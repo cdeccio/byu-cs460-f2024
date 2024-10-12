@@ -342,39 +342,46 @@ work properly.
  - A router starts out knowing only about the IP prefixes to which it is
    directly connected.  For example, as shown in the
    [example given previously](#starter-commands), `r2`'s initial DV in
-   scenario 1 (i.e., before it receives any DVs from neighbors) from the would
-   look something like this:
+   scenario 1 (i.e., before it receives any DVs from neighbors) would look
+   something like this:
 
-   - Prefix: 10.0.0.0/30; Distance: 0
-   - Prefix: 10.0.0.4/30; Distance: 0
+   - Prefix: 10.0.0.0/30; Distance: 0  (`r2` has IP address 10.0.0.2 in this
+     subnet)
+   - Prefix: 10.0.0.4/30; Distance: 0  (`r2` has IP address 10.0.0.5 in this
+     subnet)
 
-   However, we will _not_ do that for for this lab.  Instead, the prefixes that
-   will be passed around will be /32's.  That is, we will treat IP _addresses_ as
-   the IP _prefixes_.  Thus, instead of `r2` starting with `10.0.0.0/30` and
-   `10.0.0.4/30`, it will start with:
+   And `r3`'s initial DV in scenario 1 would look something like this:
 
-   - Prefix: 10.0.0.2/32; Distance: 0
-   - Prefix: 10.0.0.5/32; Distance: 0
+   - Prefix: 10.0.0.4/30; Distance: 0 (`r3` has IP address 10.0.0.6 in this
+     subnet)
+   - Prefix: 10.0.0.8/30; Distance: 0 (`r3` has IP address 10.0.0.9 in this
+     subnet)
 
-   The short explanation for this is that it will simplify things, so you can
-   focus on the routing.
+   *Important explanatory note!*  Both `r2` and `r3` have an interface in the
+   10.0.0.4/30 subnet.  The IP address of `r2`'s interface (10.0.0.5) is -- and
+   must be -- distinct from that of `r3`'s interface (10.0.0.6).  Yet because
+   they both are connected to the same subnet, they will both advertise the
+   subnet 10.0.0.4/30 with distance 0!  You might wonder how this will work.
+   Suppose a packet leaves `r5` destined for 10.0.0.5 (`r2`'s `r2-r3`
+   interface).  Because `r3`'s distance to 10.0.0.4/30 is 0, the packet won't
+   go beyond `r3`, right?  The answer is that once such a packet reaches `r3`,
+   `r3` discovers (from its IP forwarding table) that the packet's final
+   destination (10.0.0.5) is on the subnet associated with its `r3-r2`
+   interface, and there is no explicit next-hop IP address.  Thus, the next-hop
+   IP address is the final destination (10.0.0.5).  At this point, `r3` just
+   needs to craft an Ethernet frame using the MAC address associated with
+   10.0.0.5.  How does it know that MAC address?  Using ARP, of course!  You do
+   not need to use your own ARP implementation in this lab; the routers will do
+   it for you.
 
-   Here is the longer explanation.  You might notice that when we advertise the
-   entire prefix, instead of the /30, both `r1` and `r2` (in scenario 1) will
-   have an entry for `10.0.0.0/30`.  You might ask when how a packet leaving
-   `r5` to 10.0.0.1 (`r1`) will actually reach `r1`, seeing as `r2` is
-   indicating that it can reach `10.0.0.0/30` with distance 0.  The answer is that
-   once such a packet reaches `r2`, `r2` discovers (from its IP forwarding
-   table) that the packet's final destination is on the subnet associated with
-   its `r2-r1` interface.  So it just needs to craft a special Ethernet frame
-   using the MAC address of the final destination (in this case 10.0.0.1 or
-   `r1`'s `r1-r2` interface).  How does it know that MAC address?  From ARP, of
-   course :).  In _this_ lab, by routing with /32 prefixes, we remove the
-   dependency on ARP to keep things more simple.
+   To build your initial entries, use the following resources:
 
-   The IP address for each interface can be found by calling the
-   `ipv4_address_info_single()` method.  To make it a prefix, simply add "/32"
-   to the end.
+   - Use the `physical_interfaces()` method to get the list of all interface
+     names.
+   - Use the `DVRouter.prefix_for_int()` method (implemented for you) to return
+     a string representing the IP prefix associated with a given interface.
+     Note that this method will only work if you have implemented the helper
+     methods in `prefix.py` properly.
 
  - A router sends its own DV to every one of its neighbors in a UDP datagram.
    You do not have to set up the socket for sending and receiving UDP datagrams
@@ -398,14 +405,11 @@ work properly.
    subnet.  For example, the broadcast address for 10.1.2.0/24 is 10.1.2.255.
    And the broadcast address for 10.1.2.20/30 is 10.1.2.23.
    
-   You might recall that the [previous lab](../06-lab-network-layer/) had you
-   create several functions related to IP prefix handling, one of which was to
-   generate the broadcast (last) address for a given subnet (see
-   [Part 2](../06-lab-network-layer/README.md#part-2---forwarding-table) and also
-   the `handle_ip()` method in
-   [Part 3](../06-lab-network-layer/README.md#instructions-2).  The
-   `bcast_for_int()` method uses those functions to return the broadcast IP
-   address for the subnet associated with a given interface.
+   The `DVRouter.bcast_for_int()` method (implemented for you) returns a string
+   representing the broadcast IP address associated with the given interface.
+   Note that this method will only work if you have implemented the helper
+   methods in `prefix.py` properly.  See the
+   [Network Layer Lab](../06-lab-network-layer/README.md#part-2---forwarding-table).
 
    Note that the subnet-specific broadcast address is used instead of a global
    broadcast (255.255.255.255) for (at least) two reasons:
@@ -664,8 +668,6 @@ following distribution:
 
 
 # Automated Testing
-
-(Driver is work-in-progress and will be included soon.)
 
 For your convenience, a [script](driver.py) is also provided for automated
 testing.  This is not a replacement for manual testing but can be used as a
