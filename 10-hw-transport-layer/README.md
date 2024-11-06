@@ -52,16 +52,15 @@ Run the following command to create and start the network:
 cougarnet --display --wireshark=a-s1 h2-s1.cfg
 ```
 
-
-## Begin Packet Capture
-Now go to the open Wireshark window, click the "Capture Options" button (the
-gear icon).  Select the `s1-a` interface for packet capture.
+Wireshark will automatically open, capturing packets on the device associated
+with the link between `a` and `s1`.
 
 
-# Part 1 - TCP Analysis of Large HTTP Response
+# Part 1 - Analysis of TCP Three-Way Handshake and MSS
 
-Make sure the file `byu-y-mtn.jpg` is in the current directory.  Then run the
-following command on host `b` to start an HTTP server listening:
+Make sure you are in the directory that contains `byu-y-mtn.jpg`.  Then run the
+following command on host `b` to start an HTTP server listening for incoming
+HTTP requests on port 8000:
 
 ```bash
 b$ python3 -m http.server
@@ -76,15 +75,57 @@ a$ curl -o /dev/null http://10.0.0.2:8000/byu-y-mtn.jpg
 This will request the file `byu-y-mtn.jpg` from 10.0.0.2 (host `b`) port 8000
 and store it to `/dev/null` (nowhere).
 
-Now go to the wireshark output.  You should see the control packets associated
-with a TCP three-way handshake, followed by a TCP segment from 10.0.0.1
-containing an HTTP GET request, followed by a bunch of ACK packets from
-10.0.0.2.  Right-click on one of the packets, then hover over "Protocol
-Preferences" in the menu that appears, then "Transmission Control Protocol".
-Now _uncheck_ the box that says "Allow subdissector to reassemble TCP streams.
-When "reassembling" is enabled, Wireshark combines all TCP segments associated
-with a single HTTP response, which behavior is confusing when analyzing TCP.
-Once unchecked, you should see the individual segments associated with separate
+Now go to the Wireshark output, and use the packets associated with
+the TCP three-way handshake to answer the following questions:
+
+ 1. What is the raw sequence number in the SYN packet?
+
+ 2. What is the relative sequence number in the SYN packet (i.e., relative to
+    the raw sequence number)?
+
+ 3. What is the raw sequence number in the SYNACK packet?
+
+ 4. What is the relative sequence number in the SYNACK packet (i.e., relative
+    to the raw sequence number)?
+
+ 5. What is the raw acknowledgment number in the SYNACK packet?
+
+ 6. What is the relative acknowledgment number in the SYNACK packet (i.e.,
+    relative to the raw acknowledgment number)?
+
+ 7. What is the raw sequence number in the ACK packet?
+
+ 8. What is the relative sequence number in the ACK packet (i.e., relative
+    to the raw sequence number)?
+
+ 9. What is the raw acknowledgment number in the ACK packet?
+
+ 10. What is the relative acknowledgment number in the ACK packet (i.e.,
+     relative to the raw acknowledgment number)?
+
+ 11. What MSS value does the client advertise to the server in the TCP option
+     of the SYN packet?
+
+ 12. What MSS value does the server advertise to the client in the TCP option
+     of the SYNACK packet?
+
+
+# Part 2 - Analysis of Large HTTP Response
+
+Continue using the running cougarnet scenario and Wireshark instance from the
+previous part.
+
+In the Wireshark window, following the packets corresponding to the TCP
+three-way handshake, you will see a TCP segment from 10.0.0.1 containing an
+HTTP GET request and a lot of TCP segments from 10.0.0.2 containing the HTTP
+response.
+
+Right-click on one of the packets, then hover over "Protocol Preferences" in
+the menu that appears, then "Transmission Control Protocol".  Now _uncheck_ the
+box that says "Allow subdissector to reassemble TCP streams.  When
+"reassembling" is enabled, Wireshark combines all TCP segments associated with
+a single HTTP response, which behavior is confusing when analyzing TCP.  Once
+unchecked, you should see the individual segments associated with separate
 packets.
 
 Now select "Statistics" from the Wireshark menu.  Then hover over "TCP Stream
@@ -104,95 +145,86 @@ destination and the acknowledgments to propagate back to the sender.
 
 Answer the questions below:
 
- 1. Beginning at time 0, when the first stack of segments (i.e., round 1) is
+ 13. Beginning at time 0, when the first stack of segments (i.e., round 1) is
     issued, through the time the eighth stack of segments (i.e., round 8) is
     issued, how does the send window grow?  That is, how does the number of
     bytes (and segments) sent in round `i` compare to the number sent in round
     `i - 1`?
 
- 2. Based on your response to the previous problem, what congestion control
+ 14. Based on your response to the previous problem, what congestion control
     state would you say that the sender is in during the sending of these first
     8 rounds?
 
- 3. How does the idle time change as the rounds increase?  Briefly explain why.
+ 15. How does the idle time change as the rounds increase?  Briefly explain why.
 
- 4. Explain what the graph will look like if the current pattern holds.
+ 16. Explain what the graph will look like if the current pattern holds.
 
 
-# Part 2 - TCP Fast Open
+# Part 2 - TCP Flow Control
 
-This problem is an exercise to help you understand TCP Fast Open (TFO).  The
-script `tfo_echo.py` can be run both as an echo client and an echo server,
-depending on the presence of the `-l` option.  When the script is run with the
-`-f` option, TFO is used.
+Continue using the running cougarnet scenario and Wireshark instance for this
+exercise.  Close the "Time Sequence" window in Wireshark.  Then click the
+"Restart current capture" button from the Wireshark instance to clear all the
+packets captured in Part 2.
 
-Re-start your Wireshark capture.  Then run the following on host `b` to start
-the echo server:
-
-```bash
-b$ python3 tfo_echo.py -l 5599
-```
-
-On host `a`, running the following to run the client:
+On host `b` enter `Ctrl`+`c` to stop the HTTP server.  Then start an
+interactive Python shell on host `b` by entering the following:
 
 ```bash
-a$ python3 tfo_echo.py 10.0.0.2 5599 foobar
+b$ python3
 ```
 
-Now answer the following questions about the packet capture:
+Enter the following into the interactive Python shell opened on host `b`:
 
- 1. What were the relative sequence number and the segment length (i.e., the
-    TCP payload) associated with the SYN packet?
+```
+>>> import socket
+>>> s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+>>> s.bind(('0.0.0.0', 5599))
+>>> s.listen()
+>>> s1, addr = s.accept()
+```
 
- 2. What was the relative acknowledgement number associated with the SYNACK packet?
+This starts a TCP server socket, listening for incoming connections on
+port 5599.  Note that the prompt will not return after the call to `accept()`;
+`accept()` only returns when a client has initiated a connection to the server.
+We will do that next, from host `a`.
 
- 3. How many RTTs did it take for the string "echoed" by the server to be
-    received by the client, including connection establishment?  (Note: don't
-    actually add up the time; just think about and perhaps draw out the back
-    and forth interactions between client and server.)
-
- 4. Was there a TFO option in the TCP header?  If so, was there a cookie, and
-    what was its value?
-
-Now use `Ctrl`-`c` on host `b` to interrupt the running echo server.  Then run
-the following on both host `a` and host `b`:
+On host `a` run the following to start an interactive Python shell:
 
 ```bash
-sudo sysctl net.ipv4.tcp_fastopen=3
+a$ python3
 ```
 
-Depending on the value passed to the `net.ipv4.tcp_fastopen` value, TFO might
-be enabled for only when the host is acting as a TCP client, only when the host
-is acting as a TCP server, or both.  The value 3 enables TFO from both a client
-perspective _and_ a server perspective.
+Enter the following into the interactive Python shell opened on host `a`:
 
-Restart the server on host `b` with the following command (note the presence of
-the `-f` option):
-
-```bash
-b$ python3 tfo_echo.py -f -l 5599
+```
+>>> import socket
+>>> s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+>>> s.connect(('10.0.0.2', 5599))
+>>> s.send(b'\x00' * 5000000)
 ```
 
-Now run the client again on host `a` with the following command (note the
-presence of the `-f` option):
+This creates a TCP client socket and connects it to the server running on host
+`a`.  It then calls `send()` with 5 million bytes of data (all value 0) to be
+sent.
 
-```bash
-a$ python3 tfo_echo.py -f 10.0.0.2 5599 foobar
+Note two things.  First, `recv()` was never called on the socket `s1` on host
+`a`.  Thus, any data sent to that socket from the client is never retrieved
+from the socket's "ready" buffer and passed to the application.  Second, the
+`send()` call on the socket `s` on host `b` has not returned.  To further
+examine this, answer the following questions.
+
+ 17. Look at the last TCP packet from host 10.0.0.1.  What is the value of the
+     window field in the packet?
+
+ 18. What is the cause of the value observed in the window field?
+
+Now add the following line on host `b`'s Python shell:
+
+```python
+>>> buf = s1.recv(1000000)
 ```
 
-For questions 5 - 8, answer the same questions as 1 - 4, but for the most
-recent test.
+ 19. What do you observe in the Wireshark window after entering that code?
 
-Finally, run the following again:
-
-```bash
-a$ python3 tfo_echo.py -f 10.0.0.2 5599 foobar
-```
-
-For questions 9 - 12, answer the same questions as 1 - 4, but for the most
-recent test.
-
-Now, look in the `tfo_echo.py`, and answer the following question:
-
- 13. What key differences are involved in programming a TFO connection (vs. a
-     non-TFO TCP connection) from the perspective of the _client_.
+ 20. What is the cause of the changes observed in the Wireshark window?
