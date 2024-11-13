@@ -129,7 +129,7 @@ to buffer bytes that are intended to be reliably sent, i.e., when
 The following image illustrates the role of the send buffer from the
 perspective of the `TCPSocket` class.
 
-![sendwindow-white.cfg](sendwindow-white.png)
+![sendwindow-white.cfg](images/sendwindow-white.png)
 
 The `TCPSocket` class implements the sliding window for reliable delivery, with
 the help of a `TCPSendBuffer` instance.  However, the `TCPSendBuffer` class
@@ -143,7 +143,7 @@ Both of these are dictated by the `TCPSocket` instance using methods that will
 be shown hereafter.  The perspective of the `TCPSendBuffer` is shown in the
 following diagram:
 
-![sendbuffer-white.cfg](sendbuffer-white.png)
+![sendbuffer-white.cfg](images/sendbuffer-white.png)
 
 Note that in both images the bytes labeled "Sent, ACK'd" are technically not
 part of the buffer because nothing more needs to be done with them!  They are
@@ -338,7 +338,7 @@ of in-order bytes, suitable for an application to call `TCPSocket.recv()`.
 The following image illustrates the problem faced by receive buffer from the
 perspective of the `TCPSocket` class.
 
-![receivebuffer-segments-white.cfg](receivebuffer-segments-white.png)
+![receivebuffer-segments-white.cfg](images/receivebuffer-segments-white.png)
 
 It receives different segments of data, possible overlapping, possibly out of
 order, and possibly with holes in between.  Each segment has a starting
@@ -351,7 +351,7 @@ length, these segments can be stitched together, with duplicate bytes removed,
 once all the bytes have been received.  For example, a byte-level
 representation of the receive buffer illustrated above is shown below:
 
-![receivebuffer-bytes-white.cfg](receivebuffer-bytes-white.png)
+![receivebuffer-bytes-white.cfg](images/receivebuffer-bytes-white.png)
 
 A few things to note in this particular example:
  - The first three bytes (i.e., starting with `base_seq`) have not yet been
@@ -375,7 +375,7 @@ Once an in-order sequence of bytes is ready, it can be sent to the ready
 buffer, which is simply a queue of bytes from which a `TCPSocket()` reads when
 its `recv()` method is called.
 
-![readybuffer-white.cfg](readybuffer-white.png)
+![readybuffer-white.cfg](images/readybuffer-white.png)
 
 
 ## Instructions
