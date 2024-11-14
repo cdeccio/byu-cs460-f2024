@@ -205,13 +205,13 @@ Enter the following into the interactive Python shell opened on host `a`:
 ```
 
 This creates a TCP client socket and connects it to the server running on host
-`a`.  It then calls `send()` with 5 million bytes of data (all value 0) to be
+`b`.  It then calls `send()` with 5 million bytes of data (all value 0) to be
 sent.
 
 Note two things.  First, `recv()` was never called on the socket `s1` on host
-`a`.  Thus, any data sent to that socket from the client is never retrieved
+`b`.  Thus, any data sent to that socket from the client is never retrieved
 from the socket's "ready" buffer and passed to the application.  Second, the
-`send()` call on the socket `s` on host `b` has not returned.  To further
+`send()` call on the socket `s` on host `a` has not returned.  To further
 examine this, answer the following questions.
 
  17. Look at the last TCP packet from host 10.0.0.1.  What is the value of the
