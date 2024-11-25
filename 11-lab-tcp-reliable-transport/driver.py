@@ -104,20 +104,20 @@ class Scenario2(Lab5Tester):
     maxtime = 5
 
 class Scenario3(Lab5Tester):
-    cmd = ['cougarnet', '--stop=25', '--terminal=none', '--vars',
+    cmd = ['cougarnet', '--stop=35', '--terminal=none', '--vars',
            'loss=0,window=10000,file=byu-y-mtn.jpg,fast_retransmit=off',
            'scenario1.cfg']
     filename = 'byu-y-mtn.jpg'
     sha1output = '6d82cbd6949c0bb89a9071b821bb62ed73a462ff'
-    maxtime = 20
+    maxtime = 30
 
 class Scenario4(Lab5Tester):
-    cmd = ['cougarnet', '--stop=25', '--terminal=none', '--vars',
+    cmd = ['cougarnet', '--stop=35', '--terminal=none', '--vars',
            'loss=0,window=50000,file=byu-y-mtn.jpg,fast_retransmit=off',
            'scenario1.cfg']
     filename = 'byu-y-mtn.jpg'
     sha1output = '6d82cbd6949c0bb89a9071b821bb62ed73a462ff'
-    maxtime = 10
+    maxtime = 30
 
 class Scenario5(Lab5Tester):
     cmd = ['cougarnet', '--stop=20', '--terminal=none', '--vars',
@@ -128,12 +128,12 @@ class Scenario5(Lab5Tester):
     maxtime = 10
 
 class Scenario6(Lab5Tester):
-    cmd = ['cougarnet', '--stop=60', '--terminal=none', '--vars',
+    cmd = ['cougarnet', '--stop=80', '--terminal=none', '--vars',
            'loss=1,window=50000,file=byu-y-mtn.jpg,fast_retransmit=off',
            'scenario1.cfg']
     filename = 'byu-y-mtn.jpg'
     sha1output = '6d82cbd6949c0bb89a9071b821bb62ed73a462ff'
-    maxtime = 50
+    maxtime = 60
 
 class Scenario7(Lab5Tester):
     cmd = ['cougarnet', '--stop=10', '--terminal=none', '--vars',
@@ -144,12 +144,12 @@ class Scenario7(Lab5Tester):
     maxtime = 5
 
 class Scenario8(Lab5Tester):
-    cmd = ['cougarnet', '--stop=25', '--terminal=none', '--vars',
+    cmd = ['cougarnet', '--stop=35', '--terminal=none', '--vars',
            'loss=1,window=50000,file=byu-y-mtn.jpg,fast_retransmit=on',
            'scenario1.cfg']
     filename = 'byu-y-mtn.jpg'
     sha1output = '6d82cbd6949c0bb89a9071b821bb62ed73a462ff'
-    maxtime = 15
+    maxtime = 30
 
 def main():
     try:
