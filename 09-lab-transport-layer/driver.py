@@ -415,6 +415,9 @@ def main():
             sys.stderr.write(f'  Result: {success}/{total}\n')
     except KeyboardInterrupt:
         sys.stderr.write('Interrupted\n')
+    sys.stderr.write('''PLEASE NOTE: this driver shows the result of the
+various tests but does not currently show the weighted value of each
+test.\n''')
 
 if __name__ == '__main__':
     main()
