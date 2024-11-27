@@ -79,8 +79,10 @@ application-layer protocols such as HTTP, DNS, and SMTP.
        (a second time - you might need to click the reload button)
     4. `http://bar.com:8000/cgi-bin/test.cgi`
     5. `http://foobar.com:8000/cgi-bin/test.cgi`
-    6. `http://bar.com:8000/test.txt`
-    7. `http://bar.com:8000/test.txt`
+    6. `http://bar.com:8000/test123.txt`
+    7. `http://bar.com:8000/byu-y-mtn2.txt`
+    8. `http://bar.com:8000/test.txt`
+    9. `http://bar.com:8000/test.txt`
        (a second time - you might need to click the reload button)
 
  6. "Update" `test.txt` by running the following command:
@@ -93,7 +95,7 @@ application-layer protocols such as HTTP, DNS, and SMTP.
 
     Then re-request the following URL:
 
-    8. `http://bar.com:8000/test.txt`
+    10. `http://bar.com:8000/test.txt`
        (a third time - you might need to click the reload button)
 
  7. Find the frame that includes the very first HTTP request, i.e., "GET
@@ -115,23 +117,45 @@ Answer the following questions, using the streams corresponding to the HTTP
 requests and responses issued above.  For each question that asks "why",
 provide a brief but specific explanation.
  
- 1. In HTTP request 1, was a cookie sent by the client?  Why or why not?
- 2. In HTTP request 2, was a cookie sent by the client?  What does the answer
+ 1. In HTTP request 1, what was the domain sent by the client in the Host
+    header of the HTTP request?
+ 2. In HTTP request 1, was a cookie sent by the client?  Why or why not?
+ 3. In HTTP request 1, what was the "domain" attribute in the cookie returned
+    by the server?
+ 4. In HTTP request 2, what was the domain sent by the client in the Host
+    header of the HTTP request?
+ 5. In HTTP request 2, was the cookie sent by the client?  What does the answer
     (yes/no) tell you about the ability or inability of the server to set a
     cookie with a "domain" attribute other than its own domain name (i.e., the
     domain name in the URL)?
- 3. In HTTP request 3, was a cookie sent by the client?  What does the answer
+ 6. In HTTP request 2, what was the "domain" attribute in the cookie returned
+    by the server?
+ 7. In HTTP request 3, what was the domain sent by the client in the Host
+    header of the HTTP request?
+ 8. In HTTP request 3, was the cookie sent by the client?  What does the answer
     (yes/no) tell you about the ability or inability of the server to set a
     cookie with a "domain" attribute other than its own domain name (i.e., the
     domain name in the URL)?
- 4. In HTTP request 4, was a cookie sent by the client?  Why or why not?
- 5. In HTTP request 5, was a cookie sent by the client?  Why or why not?
- 6. In HTTP request 6, was a cookie sent by the client?  Why or why not?
- 7. What was the response code associated with request 6?  Why?
- 8. What was the response code associated with request 7?  Why was it
-    different than that of request 6?
- 9. What was the response code associated with request 8?  Why was it
-    different than that of request 7?
+ 9. In HTTP request 3, was a cookie sent by the client?  Why or why not?
+ 10. In HTTP request 4, was a cookie sent by the client?  Why or why not?
+ 11. In HTTP request 5, was a cookie sent by the client?  Why or why not?
+ 12. In HTTP request 6, was a cookie sent by the client?  Why or why not?
+ 13. What was the response code associated with request 6?  Why?
+ 14. What was the response code associated with request 7?  Why?
+ 15. What is the content type communicated by the server to the client with the
+     "Content-Type" header in request 7?
+ 16. What type of characters were used for the request headers in request 7?
+ 17. What type of characters were used for the response headers in request 7?
+ 18. What type of characters were used for the response body in request 7?
+     (Hint: look all the way through the response body.)
+ 19. What must a client do to display the image properly?
+ 20. What was the response code associated with request 8?  Why?
+ 21. What was the content type communicated by the server to the client with the
+     "Content-Type" header in request 8?
+ 22. What was the response code associated with request 9?  Why was it
+     different than that of request 8?
+ 23. What was the response code associated with request 10?  Why was it
+     different than that of request 9?
 
 
 ## Cleanup
@@ -184,18 +208,23 @@ depending on the presence of the `-l` option.  When the script is run with the
 
 Answer the following questions about the packet capture:
 
- 1. What were the relative sequence number and the segment length (i.e., the
-    TCP payload) associated with the SYN packet?
+ 24. What was the segment length (i.e., the TCP payload) associated with the
+     SYN packet?
 
- 2. What was the relative acknowledgement number associated with the SYNACK packet?
+ 25. Was there a TFO option in the TCP header of the SYN packet?  If so, was
+     there a cookie?
 
- 3. How many RTTs did it take for the string "echoed" by the server to be
-    received by the client, including connection establishment?  (Note: don't
-    actually add up the time; just think about and perhaps draw out the back
-    and forth interactions between client and server.)
+ 26. What was the relative acknowledgement number associated with the SYNACK
+     packet?
 
- 4. Was there a TFO option in the TCP header?  If so, was there a cookie, and
-    what was its value?
+ 27. Was there a TFO option in the TCP header of the SYNACK packet?  If so, was
+     there a cookie?
+
+ 28. How many RTTs did it take for the string "echoed" by the server to be
+     received by the client, including connection establishment?  (Note: don't
+     actually add up the time; just think about and perhaps draw out the back
+     and forth interactions between client and server.)
+
 
 
 ## Enabling and Priming TFO
@@ -229,7 +258,7 @@ a$ python3 tfo_echo.py -f 10.0.0.2 5599 foobar
 
 ## Questions (2)
 
-For questions 5 - 8, answer the same questions as 1 - 4, but for the most
+For questions 29 - 33, answer the same questions as 24 - 28, but for the most
 recent test.
 
 
@@ -250,10 +279,11 @@ a$ python3 tfo_echo.py -f 10.0.0.2 5599 foobar
 
 ## Questions (3)
 
-For questions 9 - 12, answer the same questions as 1 - 4, but for the most
+For questions 34 - 38, answer the same questions as 24 - 28, but for the most
 recent test.
 
- 13. Looking `tfo_echo.py`, what key differences are involved in programming a
+
+ 39. Looking `tfo_echo.py`, what key differences are involved in programming a
      TFO connection (vs. a non-TFO TCP connection) from the perspective of the
      _client_.
 
@@ -305,7 +335,7 @@ This part is an exercise to help you understand SMTP.
  6. Follow TCP Streams.  For the emails sent in #5 and #6, open the
     corresponding TCP stream by following the instructions below:
 
- 6. Find a frame that is part of the first SMTP interaction.  Right-click on
+ 7. Find a frame that is part of the first SMTP interaction.  Right-click on
     that frame, and select "Follow", then "TCP Stream".  You will see the
     entire SMTP conversation, including both server (blue) and client (red).
     Look at the contents of the SMTP session to make sure that it matches the
@@ -323,14 +353,15 @@ communications and responses issued above.  For each question that asks "why",
 provide a brief but specific explanation.
 
 
- 1. With SMTP, who initiates the SMTP conversation - client or server?
- 2. What command does the client use to introduce itself?
- 3. What command does the client use to send the actual email headers and
-    message body?
- 4. How does the client indicate to the server that it is done sending the
-    email message?
- 5. What numerical response codes did the server return for the `MAIL FROM`,
-    `RCPT TO`, `DATA`, and `QUIT` commands?
- 6. Briefly describe the makeup of image attachment in the second email, as
-    seen "on the wire".
- 7. What must the server do to display the image properly?
+ 40. With SMTP, who initiates the SMTP conversation - client or server?
+ 41. What command does the client use to introduce itself?
+ 42. What command does the client use to send the actual email headers and
+     message body?
+ 43. How does the client indicate to the server that it is done sending the
+     email message?
+ 44. What numerical response code did the server return for the `MAIL FROM`,
+     and `RCPT TO` commands?
+ 45. What numerical response code did the server return for the `QUIT` command?
+ 46. What is the makeup of the image attachment in the second email, as seen
+     "on the wire".
+ 47. What must a client do to display the image properly?
