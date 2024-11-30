@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import json
 import re
 import signal
 import subprocess
@@ -155,43 +156,56 @@ class Scenario1(Lab4Tester):
                 ]
 
     def evaluate0(self, iteration, time_seen, observations):
-        #[('OTHER', 'a', 'Netcat sending UDP msg to 10.0.0.2:1234: abcdefghijklmnop'),
-        #('OTHER', 'b', 'Host received UDP msg (10.0.0.1:23746 -> 10.0.0.2:1234): abcdefghijklmnop'),
-        #('OTHER', 'a', 'Host received ICMP (type=3, code=3), UDP msg (10.0.0.1:23746 -> 10.0.0.2:1234): abcdefghijklmnop')]
-
         if not observations:
-            sys.stderr.write('Expected netcat UDP message\n')
+            sys.stderr.write('Expected netcat UDP message leaving a\n')
             return False
         cat, hostname, msg = observations.pop(0)
         netcat_match = self.NETCAT_MSG_RE.search(msg)
         if netcat_match is None:
-            sys.stderr.write('Expected netcat UDP message\n')
+            sys.stderr.write('Expected netcat UDP message leaving a\n')
             return False
 
         if not observations:
-            sys.stderr.write('Expected UDP message\n')
+            sys.stderr.write('Expected UDP message arriving at b\n')
             return False
         cat, hostname, msg = observations.pop(0)
         host_match = self.HOST_UDP_MSG_RE.search(msg)
         if host_match is None:
-            sys.stderr.write('Expected UDP message\n')
+            sys.stderr.write('Expected UDP message arriving at b\n')
             return False
 
+        # The next packet is optional
         if not observations:
             return True
+
         cat, hostname, msg = observations.pop(0)
         icmp_match = self.HOST_ICMP_MSG_RE.search(msg)
-        if hostname == 'a' and icmp_match is not None and \
-                icmp_match.group('type') == '3' and \
-                icmp_match.group('code') == '3' and \
-                icmp_match.group('srcaddr') == host_match.group('srcaddr') and \
-                icmp_match.group('dstaddr') == host_match.group('dstaddr') and \
-                icmp_match.group('srcport') == host_match.group('srcport') and \
-                icmp_match.group('dstport') == host_match.group('dstport') and \
-                icmp_match.group('msg') == host_match.group('msg'):
-            sys.stderr.write('Extra credit for ICMP message\n')
+        if icmp_match is None:
+            sys.stderr.write('Expected an ICMP error message at a, if anything.\n')
+            return False
+        icmp_correct = { 'type': '3',
+                        'code': '3',
+                        'srcaddr': host_match.group('srcaddr'),
+                        'dstaddr': host_match.group('dstaddr'),
+                        'srcport': host_match.group('srcport'),
+                        'dstport': host_match.group('dstport'),
+                        'msg': host_match.group('msg') }
+        icmp_observed = {
+                'type': icmp_match.group('type'),
+                'code': icmp_match.group('code'),
+                'srcaddr': icmp_match.group('srcaddr'),
+                'dstaddr': icmp_match.group('dstaddr'),
+                'srcport': icmp_match.group('srcport'),
+                'dstport': icmp_match.group('dstport'),
+                }
+        if hostname != 'a':
+            sys.stderr.write('ICMP error message was expected at a, not %s\n' % \
+                    hostname)
+        elif icmp_observed != icmp_correct:
+            sys.stderr.write('ICMP message malformed:\nExpected: %s\nReceived: %s\n' % \
+                    (json.dumps(icmp_correct), json.dumps(icmp_observed)))
         else:
-            sys.stderr.write('Malformed ICMP message\n')
+            sys.stderr.write('Extra credit for ICMP message\n')
 
         if observations:
             sys.stderr.write('Expected no further packets"\n')
@@ -203,72 +217,102 @@ class Scenario1(Lab4Tester):
         return None
 
     def evaluate2(self, iteration, time_seen, observations):
-        #[('OTHER', 'a', 'Netcat sending UDP msg to 10.0.0.2:1234: abcdefghijklmnop'),
-        #('OTHER', 'b', 'Host received UDP msg (10.0.0.1:23746 -> 10.0.0.2:1234): abcdefghijklmnop'),
-        #('OTHER', 'b', 'Echo server received UDP msg from 10.0.0.1:23746: abcdefghijklmnop'),
-        #('OTHER', 'a', 'Host received UDP msg (10.0.0.2:1234 -> 10.0.0.1:23746): abcdefghijklmnop'),
-        #('OTHER', 'a', 'Netcat received UDP msg from 10.0.0.2:1234: abcdefghijklmnop')]
         if not observations:
-            sys.stderr.write('Expected netcat UDP message\n')
+            sys.stderr.write('Expected netcat UDP message leaving a\n')
             return False
         cat, hostname, msg = observations.pop(0)
         netcat_match = self.NETCAT_MSG_RE.search(msg)
         if netcat_match is None:
-            sys.stderr.write('Expected netcat UDP message\n')
+            sys.stderr.write('Expected netcat UDP message leaving a\n')
             return False
 
         if not observations:
-            sys.stderr.write('Expected UDP message\n')
+            sys.stderr.write('Expected UDP message arriving at b\n')
             return False
         cat, hostname, msg = observations.pop(0)
         host_match = self.HOST_UDP_MSG_RE.search(msg)
         if host_match is None:
-            sys.stderr.write('Expected UDP message\n')
+            sys.stderr.write('Expected UDP message arriving at b\n')
             return False
 
         if not observations:
-            sys.stderr.write('Expected echo UDP message\n')
+            sys.stderr.write('Expected echo UDP message arriving at b\n')
             return False
         cat, hostname, msg = observations.pop(0)
         echo_match = self.ECHO_MSG_RE.search(msg)
-        if hostname == 'b' and echo_match is not None and \
-                echo_match.group('srcaddr') == host_match.group('srcaddr') and \
-                echo_match.group('srcport') == host_match.group('srcport') and \
-                echo_match.group('msg') == host_match.group('msg'):
-            pass
-        else:
-            sys.stderr.write('Malformed echo UDP message\n')
+        if echo_match is None:
+            sys.stderr.write('Expected echo UDP message arriving at b\n')
             return False
+        echo_correct = { 'srcaddr': host_match.group('srcaddr'),
+                        'srcport': host_match.group('srcport'),
+                        'msg': host_match.group('msg') }
+        echo_observed = { 'srcaddr': host_match.group('srcaddr'),
+                         'srcport': host_match.group('srcport'),
+                         'msg': host_match.group('msg') }
+        if hostname != 'b':
+            sys.stderr.write('Echo message was expected at b, not %s\n' % \
+                    hostname)
+            return False
+        elif echo_observed != echo_correct:
+            sys.stderr.write('Echo message malformed:\nExpected: %s\nReceived: %s\n' % \
+                    (json.dumps(echo_correct), json.dumps(echo_observed)))
+            return False
+        else:
+            pass
 
         if not observations:
-            sys.stderr.write('Expected UDP message\n')
+            sys.stderr.write('Expected UDP message arriving at a\n')
             return False
         cat, hostname, msg = observations.pop(0)
         host2_match = self.HOST_UDP_MSG_RE.search(msg)
-        if hostname in ('a', 'c') and host2_match is not None and \
-                host2_match.group('srcaddr') == host_match.group('dstaddr') and \
-                host2_match.group('dstaddr') == host_match.group('srcaddr') and \
-                host2_match.group('srcport') == host_match.group('dstport') and \
-                host2_match.group('dstport') == host_match.group('srcport') and \
-                host2_match.group('msg') == host_match.group('msg'):
-            pass
-        else:
-            sys.stderr.write('Malformed UDP message\n')
+        if host2_match is None:
+            sys.stderr.write('Expected UDP message arriving at a or c\n')
             return False
+        host2_correct = { 'dstaddr': host_match.group('dstaddr'),
+                'srcaddr': host_match.group('srcaddr'),
+                'dstport': host_match.group('dstport'),
+                'srcport': host_match.group('srcport'),
+                'msg': host_match.group('msg') }
+        host2_observed = { 'dstaddr': host2_match.group('srcaddr'),
+                'srcaddr': host2_match.group('dstaddr'),
+                'dstport': host2_match.group('srcport'),
+                'srcport': host2_match.group('dstport'),
+                'msg': host2_match.group('msg') }
+        if hostname not in ('a', 'c'):
+            sys.stderr.write('UDP message was expected at a or c, not %s\n' % \
+                    hostname)
+            return False
+        elif host2_observed != host2_correct:
+            sys.stderr.write('UDP message malformed:\nExpected: %s\nReceived: %s\n' % \
+                    (json.dumps(host2_correct), json.dumps(host2_observed)))
+            return False
+        else:
+            pass
 
         if not observations:
-            sys.stderr.write('Expected netcat UDP message\n')
+            sys.stderr.write('Expected netcat UDP message arriving at a or c\n')
             return False
         cat, hostname, msg = observations.pop(0)
         netcat2_match = self.NETCAT_MSG_RE.search(msg)
-        if hostname in ('a', 'c') and netcat2_match is not None and \
-                netcat2_match.group('addr') == host2_match.group('srcaddr') and \
-                netcat2_match.group('port') == host2_match.group('srcport') and \
-                netcat2_match.group('msg') == host2_match.group('msg'):
-            pass
-        else:
-            sys.stderr.write('Expected netcat UDP message\n')
+        if netcat2_match is None:
+            sys.stderr.write('Expected netcat UDP message arriving at a or c\n')
             return False
+        netcat2_correct = { 'addr': host2_match.group('srcaddr'),
+                           'port': host2_match.group('srcport'),
+                           'msg': host2_match.group('msg') }
+        netcat2_observed = { 'addr': netcat2_match.group('addr'),
+                           'port': netcat2_match.group('port'),
+                           'msg': netcat2_match.group('msg') }
+        if hostname not in ('a', 'c'):
+            sys.stderr.write('Netcat UDP message was expected at a or c, not %s\n' % \
+                    hostname)
+            return False
+        elif host2_observed != host2_correct:
+            sys.stderr.write('Netcat UDP message malformed:\nExpected: %s\nReceived: %s\n' % \
+                    (json.dumps(netcat2_correct), json.dumps(netcat2_observed)))
+            return False
+        else:
+            pass
 
         if observations:
             sys.stderr.write('Expected no further packets"\n')
@@ -287,13 +331,6 @@ class Scenario2(Lab4Tester):
     cmd = ['cougarnet', '--stop=25', '--disable-ipv6',
             '--terminal=none', 'scenario2.cfg']
 
-#('OTHER', 'b', 'Host received TCP packet (10.0.0.1:65013 -> 10.0.0.2:1234)    Flags: S, Seq=37349, Ack=0'), ('OTHER', 'a', 'Host received TCP packet (10.0.0.2:1234 -> 10.0.0.1:65013)    Flags: R, Seq=0, Ack=0')]
-#[]
-#[('OTHER', 'b', 'Host received TCP packet (10.0.0.1:62963 -> 10.0.0.2:1234)    Flags: S, Seq=5945, Ack=0'), ('OTHER', 'a', 'Host received TCP packet (10.0.0.2:1234 -> 10.0.0.1:62963)    Flags: SA, Seq=53337, Ack=5946'), ('OTHER', 'b', 'Host received TCP packet (10.0.0.1:62963 -> 10.0.0.2:1234)    Flags: A, Seq=5946, Ack=53338')]
-#[('OTHER', 'b', 'Host received TCP packet (10.0.0.1:11503 -> 10.0.0.2:1234)    Flags: A, Seq=2747044733, Ack=985193125'), ('OTHER', 'a', 'Host received TCP packet (10.0.0.2:1234 -> 10.0.0.1:11503)    Flags: R, Seq=0, Ack=0')]
-#[('OTHER', 'b', 'Host received TCP packet (10.0.0.3:7814 -> 10.0.0.2:1234)    Flags: S, Seq=43350, Ack=0'), ('OTHER', 'c', 'Host received TCP packet (10.0.0.2:1234 -> 10.0.0.3:7814)    Flags: SA, Seq=58981, Ack=43351'), ('OTHER', 'b', 'Host received TCP packet (10.0.0.3:7814 -> 10.0.0.2:1234)    Flags: A, Seq=43351, Ack=58982')]
-#[('', '', '')]
-
     TCP_MSG_STR = r'TCP packet \((?P<srcaddr>\d+\.\d+\.\d+\.\d+):(?P<srcport>\d+) -> (?P<dstaddr>\d+\.\d+\.\d+\.\d+):(?P<dstport>\d+)\)\s+Flags: (?P<flags>[A-Z]+), Seq=(?P<seq>\d+), Ack=(?P<ack>\d+)'
 
     HOST_TCP_MSG_RE = re.compile(r'^Host received ' + TCP_MSG_STR + '$')
@@ -311,30 +348,54 @@ class Scenario2(Lab4Tester):
 
     def not_listening(self, iteration, time_seen, observations):
         if not observations:
-            sys.stderr.write('Expected SYN packet\n')
+            sys.stderr.write('Expected SYN packet arriving at b\n')
             return False
         cat, hostname, msg = observations.pop(0)
         host_match = self.HOST_TCP_MSG_RE.search(msg)
-        if hostname == 'b' and host_match is not None and \
-                host_match.group('flags') in ('S', 'A'):
-            pass
-        else:
-            sys.stderr.write('Malformed SYN packet\n')
+        if host_match is None:
+            sys.stderr.write('Expected SYN packet arriving at b\n')
             return False
+        if hostname != 'b':
+            sys.stderr.write('SYN packet was expected at b, not %s\n' % \
+                    hostname)
+            return False
+        elif host_match.group('flags') not in ('S', 'A'):
+            sys.stderr.write('SYN flags incorrect:\nExpected: %s\nReceived: %s\n' % \
+                    ('S or A', host_match.group('flags')))
+            return False
+        else:
+             pass
 
+        # The next packet is optional
         if not observations:
             return True
+
         cat, hostname, msg = observations.pop(0)
         host2_match = self.HOST_TCP_MSG_RE.search(msg)
-        if hostname in ('a', 'c') and host2_match is not None and \
-                host2_match.group('srcport') == host_match.group('dstport') and \
-                host2_match.group('dstport') == host_match.group('srcport') and \
-                host2_match.group('srcaddr') == host_match.group('dstaddr') and \
-                host2_match.group('dstaddr') == host_match.group('srcaddr') and \
-                host2_match.group('flags') == 'R':
-            sys.stderr.write('Extra credit for TCP RST\n')
+        if host2_match is None:
+            sys.stderr.write('Expected an SYN RST packet at a or c, if anything.\n')
+            return False
+        host2_correct = { 
+                        'srcport': host_match.group('srcaddr'),
+                        'dstport': host_match.group('dstaddr'),
+                        'srcaddr': host_match.group('srcport'),
+                        'dstaddr': host_match.group('dstport'),
+                        'flags': 'R' }
+        host2_observed = {
+                'srcport': host2_match.group('srcport'),
+                'dstport': host2_match.group('dstport'),
+                'srcaddr': host2_match.group('srcaddr'),
+                'dstaddr': host2_match.group('dstaddr'),
+                'flags': host2_match.group('flags'),
+                }
+        if hostname not in ('a', 'c'):
+            sys.stderr.write('SYN RST was expected at host a or c, not %s\n' % \
+                    hostname)
+        elif host2_observed != host2_correct:
+            sys.stderr.write('SYN RST malformed:\nExpected: %s\nReceived: %s\n' % \
+                    (json.dumps(host2_correct), json.dumps(host2_observed)))
         else:
-            sys.stderr.write('Malformed RST packet\n')
+            sys.stderr.write('Extra credit for TCP RST\n')
 
         if observations:
             sys.stderr.write('Expected no further packets"\n')
@@ -347,51 +408,91 @@ class Scenario2(Lab4Tester):
 
     def new_connection(self, iteration, time_seen, observations):
         if not observations:
-            sys.stderr.write('Expected SYN packet"\n')
+            sys.stderr.write('Expected SYN packet arriving at b"\n')
             return False
         cat, hostname, msg = observations.pop(0)
         host_match = self.HOST_TCP_MSG_RE.search(msg)
-        if hostname == 'b' and host_match is not None and \
-                host_match.group('flags') == 'S':
-            pass
-        else:
-            sys.stderr.write('Malformed SYN packet\n')
+        if host_match is None:
+            sys.stderr.write('Expected SYN packet arriving at b\n')
             return False
+        if hostname != 'b':
+            sys.stderr.write('SYN packet was expected at b, not %s\n' % \
+                    hostname)
+            return False
+        elif host_match.group('flags') != 'S':
+            sys.stderr.write('SYN flags incorrect:\nExpected: %s\nReceived: %s\n' % \
+                    ('S', host_match.group('flags')))
+            return False
+        else:
+             pass
 
         if not observations:
-            sys.stderr.write('Expected SYNACK packet\n')
+            sys.stderr.write('Expected SYNACK packet arriving at a\n')
             return False
         cat, hostname, msg = observations.pop(0)
         host2_match = self.HOST_TCP_MSG_RE.search(msg)
-        if hostname in ('a', 'c') and \
-                host2_match.group('srcport') == host_match.group('dstport') and \
-                host2_match.group('dstport') == host_match.group('srcport') and \
-                host2_match.group('srcaddr') == host_match.group('dstaddr') and \
-                host2_match.group('dstaddr') == host_match.group('srcaddr') and \
-                int(host2_match.group('ack')) == int(host_match.group('seq')) + 1 and \
-                host2_match.group('flags') == 'SA':
-            pass
-        else:
-            sys.stderr.write('Malformed SYNACK packet\n')
+        if host2_match is None:
+            sys.stderr.write('Expected SYNACK packet arriving at a\n')
             return False
+        host2_correct = {
+                'srcport': host_match.group('dstport'),
+                'dstport': host_match.group('srcport'),
+                'srcaddr': host_match.group('dstaddr'),
+                'dstaddr': host_match.group('srcaddr'),
+                'ack': int(host_match.group('seq')) + 1,
+                'flags': 'SA' }
+        host2_observed = {
+                'srcport': host2_match.group('srcport'),
+                'dstport': host2_match.group('dstport'),
+                'srcaddr': host2_match.group('srcaddr'),
+                'dstaddr': host2_match.group('dstaddr'),
+                'ack': int(host2_match.group('ack')),
+                'flags': host2_match.group('flags') }
+        if hostname not in ('a', 'c'):
+            sys.stderr.write('SYN packet was expected at a or c, not %s\n' % \
+                    hostname)
+            return False
+        elif host2_observed != host2_correct:
+            sys.stderr.write('SYN packet malformed:\nExpected: %s\nReceived: %s\n' % \
+                    (json.dumps(host2_correct), json.dumps(host2_observed)))
+            return False
+        else:
+            pass
 
         if not observations:
-            sys.stderr.write('Expected ACK packet\n')
+            sys.stderr.write('Expected ACK packet arriving at b\n')
             return False
         cat, hostname, msg = observations.pop(0)
         host3_match = self.HOST_TCP_MSG_RE.search(msg)
-        if hostname == 'b' and \
-                host3_match.group('srcport') == host_match.group('srcport') and \
-                host3_match.group('dstport') == host_match.group('dstport') and \
-                host3_match.group('srcaddr') == host_match.group('srcaddr') and \
-                host3_match.group('dstaddr') == host_match.group('dstaddr') and \
-                int(host3_match.group('ack')) == int(host2_match.group('seq')) + 1 and \
-                int(host3_match.group('seq')) == int(host_match.group('seq')) + 1 and \
-                host3_match.group('flags') == 'A':
-            pass
-        else:
-            sys.stderr.write('Malformed ACK packet\n')
+        if host3_match is None:
+            sys.stderr.write('Expected ACK packet arriving at b\n')
             return False
+        host3_correct = {
+                'srcport': host_match.group('srcport'),
+                'dstport': host_match.group('dstport'),
+                'srcaddr': host_match.group('srcaddr'),
+                'dstaddr': host_match.group('dstaddr'),
+                'ack': int(host2_match.group('seq')) + 1,
+                'seq': int(host_match.group('seq')) + 1,
+                'flags': 'A' }
+        host3_observed = {
+                'srcport': host3_match.group('srcport'),
+                'dstport': host3_match.group('dstport'),
+                'srcaddr': host3_match.group('srcaddr'),
+                'dstaddr': host3_match.group('dstaddr'),
+                'ack': int(host3_match.group('ack')),
+                'seq': int(host3_match.group('seq')),
+                'flags': host3_match.group('flags') }
+        if hostname != 'b':
+            sys.stderr.write('ACK packet was expected at b, not %s\n' % \
+                    hostname)
+            return False
+        elif host3_observed != host3_correct:
+            sys.stderr.write('ACK packet malformed:\nExpected: %s\nReceived: %s\n' % \
+                    (json.dumps(host3_correct), json.dumps(host3_observed)))
+            return False
+        else:
+            pass
 
         if observations:
             sys.stderr.write('Expected no further packets"\n')
