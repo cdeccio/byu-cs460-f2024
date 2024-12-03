@@ -80,7 +80,7 @@ application-layer protocols such as HTTP, DNS, and SMTP.
     4. `http://bar.com:8000/cgi-bin/test.cgi`
     5. `http://foobar.com:8000/cgi-bin/test.cgi`
     6. `http://bar.com:8000/test123.txt`
-    7. `http://bar.com:8000/byu-y-mtn2.txt`
+    7. `http://bar.com:8000/byu-y-mtn2.jpg`
     8. `http://bar.com:8000/test.txt`
     9. `http://bar.com:8000/test.txt`
        (a second time - you might need to click the reload button)
