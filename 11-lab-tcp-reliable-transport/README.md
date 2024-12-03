@@ -759,7 +759,7 @@ When this is working, test on an even larger file, `byu-y-mtn.jpg`:
 $ cougarnet --vars loss=0,window=10000,file=byu-y-mtn.jpg,fast_retransmit=off scenario1.cfg
 ```
 
-This one should transfer in roughly 12 seconds and should also be in tact:
+This one should transfer in roughly 15 seconds and should also be in tact:
 
 ```
 $ sha1sum byu-y-mtn.jpg downloads/byu-y-mtn.jpg
@@ -774,7 +774,11 @@ bytes:
 $ cougarnet --vars loss=0,window=50000,file=byu-y-mtn.jpg,fast_retransmit=off scenario1.cfg
 ```
 
-The larger window should cut the transfer time down to about 5 seconds.
+The larger window _should_ cut the transfer time down significantly.  However,
+because some architectures and virtualization platforms perform differently, we
+have observed cases in which the reduction in transfer time is not significant.
+At the very least, however, the transfer time should not be expected to
+increase.
 
 
 ### Some Loss
@@ -797,7 +801,8 @@ $ cougarnet --vars loss=1,window=50000,file=byu-y-mtn.jpg,fast_retransmit=off sc
 ```
 
 The file should still transfer properly (i.e., as shown by `sha1sum`), though
-it might take up to 60 seconds or more with the timeouts and retransmissions.
+it might take 40 - 60 seconds -- or perhaps longer -- with the timeouts and
+retransmissions.
 
 
 ## All Together
@@ -842,7 +847,7 @@ $ cougarnet --vars loss=0,window=10000,file=byu-y-mtn.jpg,fast_retransmit=on --t
 $ cougarnet --vars loss=0,window=50000,file=byu-y-mtn.jpg,fast_retransmit=on --terminal=none scenario1.cfg
 ```
 
-Running the tests with packet loss should result in faster transmission times:
+Running the tests with packet loss _should_ result in faster transmission times:
 
 ```
 $ cougarnet --vars loss=5,window=10000,file=test.txt,fast_retransmit=on scenario1.cfg
@@ -858,8 +863,14 @@ e742dc9de5bac34d82117e015f597378a205e5c1  test.txt
 e742dc9de5bac34d82117e015f597378a205e5c1  downloads/test.txt
 ```
 
-Likewise, the file `byu-y-mtn.jpg` should transfer in about 5 or 6 seconds, and it
-should be in tact:
+Likewise, the file `byu-y-mtn.jpg` should transfer in about 5 or 6 seconds,
+Fast retransmit _should_ cut the transfer time down significantly from the
+scenario where fast retransmit is not used.  However, because some
+architectures and virtualization platforms perform differently, we have
+observed cases in which the reduction in transfer time is not significant.  At
+the very least, however, the transfer time should not be expected to increase.
+
+Also, the file should be in tact:
 
 ```
 $ sha1sum byu-y-mtn.jpg downloads/byu-y-mtn.jpg
