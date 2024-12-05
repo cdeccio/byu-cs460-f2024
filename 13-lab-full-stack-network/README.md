@@ -17,7 +17,7 @@ and communicate over that path from socket to socket, process to process.
    - [Handle Subnet-Level Broadcasts](#handle-subnet-level-broadcasts)
    - [Integrate Forwarding Table](#integrate-forwarding-table)
    - [Integrate UDP Socket Functionality](#integrate-udp-socket-functionality)
-   - [Route Prefixes Instead of IP Addresses](#route-prefixes-instead-of-ip-addresses)
+   - [Integrate Routing with UDP Sockets](#integrate-routing-with-udp-sockets)
    - [Integrate TCP Socket Functionality](#integrate-tcp-socket-functionality)
    - [Integrate Layer-2 Switching](#integrate-layer-2-switching)
  - [Testing](#testing)
@@ -169,7 +169,7 @@ should show that each of these was received by the destination.
    Integration of your `TCPSocket` implementation will come at a later step.
 
 
-## Route Prefixes Instead of IP Addresses
+## Integrate Routing with UDP Sockets
 
  - Integrate your distance vector (DV) routing implementation from the
    `DVRouter` class into `dvrouter.py`, using the `dvrouter.py` you created in
@@ -193,53 +193,7 @@ should show that each of these was received by the destination.
      running it functions like a router that forwards packets, and uses DV to
      learn routes and update forwarding tables.
 
- - In the [Routing Lab](../08-lab-routing) each router announced its IP addresses
-   (i.e., in the DV), such that each learned the shortest distance (and next
-   hop) associated with a set of IP addresses--or /32 networks.  This was to
-   simplify implementation and to avoid dependency on ARP.  However, in a more
-   realistic scenario, prefixes (i.e., with more than one IP address) are
-   announced instead.
-
-   Modify your `DVRouter` implementation such that the DVs map IP prefixes to
-   distances instead of mapping IP addresses to distances.  This really only
-   requires a change in one place in your code.  When your router iterates over
-   its interfaces to populate its DV with its own IP addresses, substitute the
-   IP address with the IP prefix for that subnet, in x.x.x.x/y format.
-
-   For example, with the [current topology](#topology) `r1`'s initial DV (i.e.,
-   before it receives any DVs from neighbors) will look something like this:
-
-   - Prefix: 10.0.0.0/24; Distance: 0
-   - Prefix: 10.0.100.0/30; Distance: 0
-
-   And `r2`'s initial DV will look something like this:
-
-   - Prefix: 10.0.100.0/30; Distance: 0
-   - Prefix: 10.0.100.4/30; Distance: 0
-
-   It might seem confusing that prefix 10.0.100.0/30 originates from two
-   different routers, specifically `r1` and `r2`.  To help explain this
-   apparent discrepancy, remember that the goal of routing is not to get a
-   packet to the destination _host_ but to get the packet to the router that
-   has an interface in the same _subnet_ or _LAN_ as the destination.  So
-   whether a packet destined for 10.0.100.1 arrives at `r1` or `r2`, it doesn't
-   matter; both routers have an interface in 10.0.100.0/30 and thus can use ARP
-   and Ethernet to get the packet to its final destination.
-
-   The next question is how to _create_ the prefix.  First, recall that
-   the IP address and prefix length for each interface can be found with the
-   IP address object returned from the `ipv4_address_info_single()` method.
-   Using these two items, you can create the prefix using the
-   `ip_str_to_int()`, `ip_prefix()`, and `ip_int_to_str()` functions in
-   `prefix.py`.
-
-   Thus for an IP address of 192.0.2.2 and a prefix length of 24, the prefix
-   would be 192.0.2.0/24.
-
-   You can look at the `bcast_for_int()` method as an example.
-
-To test routing using prefixes and your own forwarding table, you can run the
-following:
+To test routing using your own forwarding table, you can run the following:
 
 ```bash
 $ cougarnet --disable-ipv6 scenario3.cfg
