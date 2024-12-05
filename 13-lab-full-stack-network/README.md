@@ -83,29 +83,9 @@ Please note that with `scenario1.cfg` through `scenario4.cfg`, all switches are
    [Network Layer Lab](../06-lab-network-layer) to the current directory,
    overwriting the stock file that was provided.
    
- - `Host.send_packet_on_int()` currently checks the host's ARP table for an
-   entry corresponding to the next-hop IP address, and if no entry is found, it
-   sends an ARP request.  However, in the case that the destination IP address
-   is the local broadcast address, the packet itself should go to every host on
-   the LAN.  And of course, no host has an interface configured with the
-   broadcast IP address (i.e., because it is special address designed for the
-   very purpose of designating that a packet to to every host), so an ARP
-   request would go unanswered.  When the destination IP address is the
-   broadcast address of the local subnet, the destination MAC address for the
-   frame will simply be the broadcast Ethernet address.
-
-   Modify `Host.send_packet_on_int()` to check if the destination IP address of
-   the packet being sent matches the broadcast IP address for the subnet
-   corresponding to the interface on which it is being sent.  If the
-   destination IP address matches the subnet's broadcast IP address, then
-   simply use the broadcast MAC address (ff:ff:ff:ff:ff:ff) as the destination
-   MAC address.  At this point, you can build and send the frame.  If the
-   destination IP address is not the broadcast IP address, then proceed with
-   checking your ARP table and sending an ARP request, if necessary.
-
-   If it is helpful, you could move the `bcast_for_int()` method (currently in
-   the `DVRouter` class) into the `Host` class.  Then it could be used in both
-   classes--since `DVRouter` inherits from `Host`.
+ - If you haven't already, follow the instructions in the section
+   "[Handle IP Broadcasts](../06-lab-network-layer#handle-ip-subnet-level-broadcasts)"
+   of the Network Layer Lab.
 
 You can test your functionality after adding your forwarding table
 implementation in the next step.
