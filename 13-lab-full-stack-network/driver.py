@@ -138,7 +138,7 @@ class Scenario5(Lab6Tester):
     cmd = ['cougarnet', '--stop=20', '--disable-ipv6',
             '--terminal=none', 'scenario5.cfg']
 
-    TCP_MSG_STR = r'TCP packet \((?P<srcaddr>\d+\.\d+\.\d+\.\d+):(?P<srcport>\d+) -> (?P<dstaddr>\d+\.\d+\.\d+\.\d+):(?P<dstport>\d+)\)\s+Flags: (?P<flags>[A-Z]+), Seq=(?P<seq>\d+), Ack=(?P<ack>\d+), Data=(?P<data>.*)'
+    TCP_MSG_STR = r'TCP packet \((?P<srcaddr>\d+\.\d+\.\d+\.\d+):(?P<srcport>\d+) -> (?P<dstaddr>\d+\.\d+\.\d+\.\d+):(?P<dstport>\d+)\)\s+Flags: (?P<flags>[A-Z]*), Seq=(?P<seq>\d+), Ack=(?P<ack>\d+), Data=(?P<data>.*)'
 
     HOST_TCP_MSG_RE = re.compile(r'^Received ' + TCP_MSG_STR + '$')
 
